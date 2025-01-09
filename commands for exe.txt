@@ -1,0 +1,44 @@
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>1. Running Python Scripts
+Since you have a zencrypt.py script, you can run it directly on Linux. To make it easier, you can create a simple shell script that calls your Python script.
+
+Steps:
+Make the Python Script Executable: 
+##
+## start copy
+chmod +x zencrypt.py
+## end copy
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+2. Create a Shell Script (zencrypt.sh):
+
+#!/bin/bash
+python3 /path/to/zencrypt.py "$@"
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+3. Make the Shell Script Executable:
+
+chmod +x zencrypt.sh
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+With this, you can run your script with ./zencrypt.sh from the terminal.
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+2. Packaging Python Script with PyInstaller
+You can use PyInstaller to convert your Python script into an executable that can run on Linux.
+
+Steps:
+Install PyInstaller:
+
+pip install pyinstaller
+pyinstaller --onefile zencrypt.py
+
+This will create a standalone executable in the 'dist' folder than you can run on Linux.
+
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+3. Compiling Java Code
+If you have a Java version of your script, you can compile and run it on Linux using the javac and java commands.
+
+Compile the Java File:
+
+javac Zencrypt.java
+
+Run the Compiled Java Class:
+
+java Zencrypt
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
