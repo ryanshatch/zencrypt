@@ -36,7 +36,8 @@ Version: 2.0                     ***********************************************
     <p align="center">
 <!--       <br> -->
       <strong>By: Ryan Hatch</strong>
-    <p align="center"> &copy; 2023 Ryan Hatch <br> All Rights Reserved. </p>
+    <p align="center"> This software is proprietary and owned by Ryan Hatch. Unauthorized use, modification, or distribution is prohibited.<br><br>&copy; 2025 Ryan Hatch <br> All Rights Reserved.<br>
+ </p>
     <h2 id="introduction">Introduction</h2>
     <p> This project provides a command-line interface for managing hashes and encryption for input text. It includes both a Python and a Java implementation along with a lite version in C++.</p>
     <ul>
