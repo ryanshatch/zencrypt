@@ -514,4 +514,8 @@ print("                      /__\\    /__\\")
 print("                     /\\  /\\  /\\  /\\")
 print("                    /__\\/__\\/__\\/__\\")
 
+<<<<<<< HEAD
 main_menu()                                             # runs the main menu for the Zencrypt CLI under the Triforce banner
+=======
+main_menu()                                             # runs the main menu for the Zencrypt CLI under the Triforce banner
+>>>>>>> origin/main
