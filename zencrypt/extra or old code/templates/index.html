@@ -1,0 +1,25 @@
+<!-- 
+****************************************************************************************
+* Title: SHA-256 Application       *****************************************************
+* Developed by: Ryan Hatch         *****************************************************
+* Date: August 3 2023              *****************************************************
+* Last Updated: November 28 2023   *****************************************************
+* Version: 1.5.0                   *****************************************************
+****************************************************************************************  
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hash Generator</title>   <!-- Title of the page -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">   <!-- Link to the CSS file -->
+</head>
+<body>
+    <pre>{{ banner|safe }}</pre>
+    <form action="/hash" method="post">
+        <label for="text">Enter Text:</label>  <!-- Label for the input field -->
+        <input type="text" name="text" required>    <!-- Input field -->
+        <input type="submit" value="Generate Hash" method="post">   <!-- Submit button -->
+    </form>
+</body>
+</html>
