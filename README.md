@@ -29,7 +29,7 @@ Version: 5.0                     ***********************************************
     <p align="center"> &copy; 2025 Ryan Hatch <br> All Rights Reserved.<br><i>This software is proprietary and owned by Ryan Hatch. Unauthorized use, modification, or distribution is prohibited.</i> </p>
     <h4>Last updated: Jan 20 2025 - Updated comments and added a more simple structure for the changes to be made.</h2>
     <h2 id="introduction">Introduction</h2>
-    <p> This project provides a command-line interface for managing hashes and encryption for input text. It includes both a Python and a Java implementation along with a lite version in C++.</p>
+    <p> This project provides a command-line interface for managing hashes and encryption for input text. It includes both a CLI and a webapp cipher.</p>
     <ul>
     <li><h4>The <code>version4.2.0-alpha</code> Zencrypt is a program that can provide functionality for hashing, encrypting text, encrypting files, along with full handling of PGP encryption.</h4></li>
     <li><h4>The <code>version4.0.1-beta</code>is a basic form of Zencrypt V2 with the same functionalities and shortcut commands, but with a GUI.</h4></li>
