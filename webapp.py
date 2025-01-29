@@ -56,17 +56,37 @@ app = Flask(__name__)
 app.secret_key = secrets.token_hex(32)         # A random secret key is generated using the secrets module for session management
 
 #* Setting up the private key for encryption/decryption
-KEY_FILE = "zen.key"                       # The private key is stored in a file called "private.key"
+KEY_FILE = "/etc/secrets/zen.key"  #* Check Render's Secret Files location for the private key
 
-def initialize_key(): 
-    if not os.path.exists(KEY_FILE):           # If the private key file does not exist in the directory
-        key = Fernet.generate_key()            # A new key is generated and stored in the file under the name "private.key"
-        with open(KEY_FILE, "wb") as key_file: # The key is written to the file in binary mode
-            key_file.write(key)                # The key is written to the file
-    with open(KEY_FILE, "rb") as key_file:     # If the private key file exists, the key is read from the file
-        return key_file.read()                 # The key is returned as a binary string from the file and stored in the key variable
+def initialize_key():
+    #* Check if key file exists
+    if os.path.exists(KEY_FILE):               # If the key file exists, read the key from the file
+        with open(KEY_FILE, "rb") as key_file: # Open the key file in binary read mode
+            return key_file.read()             # Read the key from the file
+    
+    #* If key doesn't exist, generate a new one
+    key = Fernet.generate_key() 
+    os.makedirs(os.path.dirname(KEY_FILE), exist_ok=True)  # Check that the /etc/secrets directory exists
+    with open(KEY_FILE, "wb") as key_file:                 # Open the key file in binary write mode
+        key_file.write(key)                                # Write the key to the file
+    
+    return key                                             # Return the newly generated key
 
-cipher_suite = Fernet(initialize_key())        # The cipher suite is initialized with the new or old private key
+cipher_suite = Fernet(initialize_key())                    # Initialize the cipher suite with the key
+
+#* First version of the initialize_key function
+#
+# KEY_FILE = "zen.key"                           # The private key is stored in a file called "private.key"
+#
+# def initialize_key(): 
+#     if not os.path.exists(KEY_FILE):           # If the private key file does not exist in the directory
+#         key = Fernet.generate_key()            # A new key is generated and stored in the file under the name "private.key"
+#         with open(KEY_FILE, "wb") as key_file: # The key is written to the file in binary mode
+#             key_file.write(key)                # The key is written to the file
+#     with open(KEY_FILE, "rb") as key_file:     # If the private key file exists, the key is read from the file
+#         return key_file.read()                 # The key is returned as a binary string from the file and stored in the key variable
+
+# cipher_suite = Fernet(initialize_key())        # The cipher suite is initialized with the new or old private key
 
 #* ---------------------- | Styling and HTML for the Web-App | ---------------------- #
 APP_TEMPLATE = """
