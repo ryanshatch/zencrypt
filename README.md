@@ -1,10 +1,10 @@
 <!--
 ****************************************************************************************
-Title: Zencrypt Readme.md        *******************************************************
+Title: Zencrypt CLI Readme.md    *******************************************************
 Developed by: Ryan Hatch         *******************************************************
 Dev Date: Aug 10th 2022          *******************************************************
-Last Updated: Jan 29 2025        *******************************************************
-Version: 5.0                     *******************************************************
+Last Updated: Oct 27th 2023      *******************************************************
+Version: 2.0                     *******************************************************
 ****************************************************************************************
 -->
 <!DOCTYPE html>
@@ -29,10 +29,12 @@ Version: 5.0                     ***********************************************
     <p align="center"> &copy; 2025 Ryan Hatch <br> All Rights Reserved.<br><i>This software is proprietary and owned by Ryan Hatch. Unauthorized use, modification, or distribution is prohibited.</i> </p>
     <h4>Last updated: Jan 20 2025 - Updated comments and added a more simple structure for the changes to be made.</h2>
     <h2 id="introduction">Introduction</h2>
-    <p> This project provides a command-line interface for managing hashes and encryption for input text. It includes both a CLI and a webapp cipher.</p>
+    <p> This project provides a command-line interface for managing hashes and encryption for input text. It includes both a Python and a Java implementation along with a lite version in C++.</p>
     <ul>
-    <li><h4>The <code>version4.2.0-alpha</code> Zencrypt is a program that can provide functionality for hashing, encrypting text, encrypting files, along with full handling of PGP encryption.</h4></li>
-    <li><h4>The <code>version4.0.1-beta</code>is a basic form of Zencrypt V2 with the same functionalities and shortcut commands, but with a GUI.</h4></li>
+    <li><h4>The <code>Python version</code> contains the full Zencrypt program that can provide functionality for hashing, encrypting text, encrypting files, along with full handling of PGP encryption.</h4></li>
+    <li><h4>The <code>Python GUI</code>is a basic form of Zencrypt V2 with the same functionalities and shortcut commands, but with a GUI.</h4></li>
+    <li><h4>The <code>Java version</code> is a clone copy of Zencrypt v3 with the inability to handle PGP encryption. All other functions remain the same.</h4></li>
+    <li><h4>The <code>C++ version</code> only allows basic hashing and encryption functions.</h4>
     </ul></li>
     <h2 id="features">Features</h2>
     <ul>
@@ -54,16 +56,21 @@ Version: 5.0                     ***********************************************
     <p> To install Zencrypt, you will need to follow these steps: </p>
     <ol>
       <li>Clone the repository or download the source code with the command:<br><code>git clone https://github.com/ryanshatch/Zencrypt.git</code>. </li>
-      <li>Navigate to the <code>main directory</code> or to the <code>./zencrypt/</code> directory. </li>
+      <li>Navigate to the <code>Python CLI</code> or to the <code>Java CLI</code> directory. </li>
       <li>Install the required dependencies with the command: <code>pip install -r requirements.txt</code>. </li>
     </ol>
     <h2 id="usage">Usage</h2>
-    <h3>Pre-Release/ Beta Version 4.0.1-beta</h3>
-    <p> 1. After installing the required dependencies, you can run the script using the Python interpreter and running the command: <code>python zencrypt_cli.py</code>, or you can run the service local via localhost using <code>python webapp.py</code>
-      <br>From there you will either continue to the next step or you will visit http:localhost/5000 <br>If you see a Triforce on your console, you did everything right and proceed to the next step.<br>2. Select whether you want to <code>hash, encrypt text, or parse files</code> and then follow the on screen instructions. <br>
+    <h3>Python Version</h3>
+    <p> 1. After installing the required dependencies, you can run the script using the Python interpreter and running the command: <code>python zencrypt.py</code>
+      <br> 2. Select whether you want to <code>hash, encrypt text, or parse files</code> and then follow the on screen instructions. <br>
       <br>To exit the program, simply enter <code>exit</code>.
     </p>
     <h2></h2>
+    <h3>Java Version</h3>
+    <p> 1. After installing the required dependencies, you can now compile and run the Java program with the commands: <code>javac Zencrypt.java</code> and <code>java Zencrypt</code>
+      <br /> 2. Select whether you want to <code>hash, encrypt text, or parse files</code> and then simply just follow the on screen instructions. <br>
+      <br>To exit the program, simply enter <code>exit</code>
+    </p>
     <p align="center">
       <br>
       <br>
@@ -185,7 +192,7 @@ Version: 5.0                     ***********************************************
       </strong>
       </br>
     </p><hr>
-    <h2 align="center" id="license">License</h2>
+    <h2 align="center" id="liscense">Liscense</h2>
     <p> This software is the property of the copyright holder and is protected by copyright laws. All rights are reserved. The copyright holder grants no implied or express license for the use, copying, modification, distribution, or reproduction of this software, in whole or in part, without the prior written permission of the copyright holder. </p>
     <p> Any unauthorized use, copying, modification, distribution, or reproduction of this software, in whole or in part, is strictly prohibited and constitutes a violation of copyright law. Such unauthorized use may result in civil and/or criminal penalties, including but not limited to legal action and monetary damages. </p>
     <p> To obtain permission for any use, copying, modification, distribution, or reproduction of this software, please contact the copyright holder at the following address: <code>ryan@rshatch.com</code>
