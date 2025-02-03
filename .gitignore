@@ -3,6 +3,11 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+*.env
+playground-1.mongodb.js
+playground-2.mongodb.js
+zen.key
+
 # User-specific files
 *.rsuser
 *.suo
