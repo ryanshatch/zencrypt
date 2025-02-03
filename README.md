@@ -72,7 +72,6 @@
 <!DOCTYPE html>
 <html>
   <body>
-    <hr>
     <h1 align="center">Zencrypt</h1>
     <hr>
     <br>
