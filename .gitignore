@@ -3,10 +3,32 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+#* SQLite database files
+*.sqlite
+*.sqlite3
+*.db
+*.db3
+*.sdb
+*.s3db
+*.sqbpro
+*.sql 
+*.sqlitedb
+*.s3db-shm
+*.s3db-wal
+*.s3db-journal
+
+*.code
+*.code-workspace
+
+# Secret files
 *.env
 playground-1.mongodb.js
 playground-2.mongodb.js
 zen.key
+oldversionusingmongodb.txt
+zen.key
+zencrypt.db
+extensions.json
 
 # User-specific files
 *.rsuser

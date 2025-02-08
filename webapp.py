@@ -27,11 +27,11 @@
     but will be in the final stages of Zencrypt v6-A1                                      *
 ********************************************************************************************
 """
-
+from models import db, User, Hash, EncryptedText, Key
 #* Importing the required libraries for the webapp
 from flask import Flask, request, render_template_string, redirect, url_for, session, jsonify, send_from_directory
+from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-from pymongo import MongoClient
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization
@@ -40,66 +40,98 @@ import hashlib
 import os
 import base64
 import secrets
+from models import Key, db
+from utils import generate_pgp_keys
 from datetime import timedelta
 from dotenv import load_dotenv
+
+# #* ---------------------- | Environment & Database Configuration | ---------------------- #
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Flask Configuration and JWT Manager
 app = Flask(__name__)
+
+# SQLite Configuration
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI', f'sqlite:///{basedir}/zencrypt.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False 
+
+# Initialize database
+db.init_app(app)
+
+# Create tables
+with app.app_context():
+    db.create_all()
+
 app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24))
 
-# JWT Configuration with secret key and token expiration time of 1 hour
-app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
+# #* ---------------------- | JWT Configuration | ---------------------- #
+
+# secret key and token expiration time of 1 hour
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+
+# Initialize JWT Manager
 jwt = JWTManager(app)
 
-# MongoDB Configuration and Connection
-mongo_client = None
-db = None
-
-# Initialize MongoDB connection to the zencrypt database and collections for users, hashes, and encrypted texts
-def init_app():
-    global mongo_client, db                                            # Use global variables for MongoDB client and database
-    mongo_uri = os.environ.get('MONGO_URI')                            # Get MongoDB URI from environment variables
-    if not mongo_uri:                                                  # Check if MongoDB URI is not found
-        print("Warning: MONGO_URI not found in environment variables") # Catch warning if MongoDB URI is not found
-        return False
-        
+# #* ---------------------- | Key Management | ---------------------- #
+def initialize_key(user_id):
+    """Initialize or retrieve encryption key for a user"""
+    # Check for existing active key
+    key = Key.query.filter_by(user_id=user_id, active=True).first()
+    
+    if key:
+        return key.key_value.encode()
+    
+    # Generate new key
+    new_key = Fernet.generate_key()
+    
+    # Store in database
+    key_entry = Key(
+        key_value=new_key.decode(),
+        user_id=user_id
+    )
+    
     try:
-        # Connect to MongoDB with a timeout of 5 seconds if the connection fails
-        mongo_client = MongoClient(mongo_uri, serverSelectionTimeoutMS=5000)
-        mongo_client.server_info()               # Check if the MongoDB server is running
-        db = mongo_client.zencrypt               # Connect to the zencrypt database in MongoDB
-        print("MongoDB connected successfully")  # If the connection is successful, print a success message
-        return True 
-    except Exception as e:                       # Catch any exceptions that occur during the MongoDB connection
-        print(f"MongoDB connection failed: {e}") # Print an error message if the connection fails
-        return False
+        db.session.add(key_entry)
+        db.session.commit()
+        return new_key
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error storing key: {e}")
+        # Fallback to temporary key if database storage fails
+        return Fernet.generate_key()
 
-# Initialize MongoDB connection when the app starts
-if not init_app(): 
-    # If the MongoDB connection fails, print a warning message and continue without the database connection
-    print("Warning: Starting without database connection")
+def get_cipher_suite(user_id):
+    """Get Fernet cipher suite for a user"""
+    key = initialize_key(user_id)
+    return Fernet(key)
 
-# Safe database operation wrapper for key operations
-KEY_FILE = "/etc/secrets/zen.key"                         # The private key is stored in a file called "zen.key"
-
-def initialize_key(): # Initialize the private key for encryption and decryption
-    if os.path.exists(KEY_FILE):                          # Check to see if the key file exists within the directory
-        with open(KEY_FILE, "rb") as key_file:            # Open the key file in binary read mode if it exists
-            return key_file.read()                        # Read the key from the file and parse the read contents.
-    
-    key = Fernet.generate_key() # Generate a new key if the key file does not exist
-    os.makedirs(os.path.dirname(KEY_FILE), exist_ok=True) # Create the directory for the key file if it does not exist
-    with open(KEY_FILE, "wb") as key_file:                # Open the key file in binary write mode
-        key_file.write(key)                               # Write the key to the file
-    
-    return key
-
-cipher_suite = Fernet(initialize_key())                   # Initialize the cipher suite with the key for encryption and decryption
-
+def rotate_key(user_id):
+    """Rotate encryption key for a user"""
+    try:
+        # Deactivate old key
+        old_key = Key.query.filter_by(user_id=user_id, active=True).first()
+        if old_key:
+            old_key.active = False
+            
+        # Generate and store new key
+        new_key = Fernet.generate_key()
+        key_entry = Key(
+            key_value=new_key.decode(),
+            user_id=user_id
+        )
+        
+        db.session.add(key_entry)
+        db.session.commit()
+        
+        return new_key
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error rotating key: {e}")
+        return None
 
 # #* ---------------------- | Styling and HTML for the Web-App | ---------------------- #
 APP_TEMPLATE = """
@@ -162,30 +194,48 @@ APP_TEMPLATE = """
             color: #ff4444;
             margin: 10px 0;
         }
+        .triforce {
+            text-align: center;
+            font-weight: bold;
+            white-space: pre;
+            margin-top: 40px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Zencrypt v5.3-A2</h1>
-        <h5><i>The Zencrypt Web-Application is Developed And Owned Entirely By <code>Ryanshatch</code></i></h5>
+        <h1>Zencrypt WebApp v5.5-A5</h1>
+        <p><i>The Zencrypt Web-Application is Developed And Owned Entirely By <code>Ryanshatch</code></i></p>
         <hr>
         
         {% if session.get('user_id') %}
             <h4>With this web-app you can:
-            <br><li>Hash text using SHA256, Encrypt text, Decrypt text.</li>
-            <li>Handle Encrypting and Decrypting Uploaded Files securely and online.</li></h4>
+            <br><li>Import or Export Keys to generate hash using SHA256 & salt, Encrypt & Decrypt text and files.</li>
             <div class="menu">
+                <p><b>Account:</b></p>
+                <a href="/export_keys"><button>Export</button></a>
+                <a href="/import_keys"><button>Import</button></a>
+                <a href="/logout"><button>Logout</button></a>
+                <hr>
+                <p><b>Cipher:</b></p>
                 <a href="/"><button>Hash</button></a>
                 <a href="/encrypt"><button>Encrypt</button></a>
                 <a href="/decrypt"><button>Decrypt</button></a>
-                <a href="/file"><button>File Operations</button></a>
-                <a href="/logout"><button>Logout</button></a>
+                <a href="/file"><button>Files</button></a>
             </div>
             <hr>
             {{ content | safe }}
             {% if output %}
                 <div class="output">{{ output }}</div>
             {% endif %}
+            <div class="triforce">
+       /\       
+      /  \      
+     /____\     
+    /\    /\    
+   /  \  /  \   
+  /____\/____\  
+            </div>
         {% else %}
             <div class="auth-container">
                 <h2>{% if request.path == '/register' %}Register{% else %}Login{% endif %}</h2>
@@ -193,8 +243,8 @@ APP_TEMPLATE = """
                     <div class="error-message">{{ error }}</div>
                 {% endif %}
                 <form method="POST" action="{% if request.path == '/register' %}/register{% else %}/login{% endif %}">
-                    <input type="email" name="email" placeholder="Email" class="w-full max-w-xs p-2 border rounded" required>
-                    <input type="password" name="password" placeholder="Password" class="w-full max-w-xs p-2 border rounded" required>
+                    <input type="email" name="email" placeholder="Email" required>
+                    <input type="password" name="password" placeholder="Password" required>
                     <button type="submit">{% if request.path == '/register' %}Register{% else %}Login{% endif %}</button>
                 </form>
                 {% if request.path == '/register' %}
@@ -203,17 +253,27 @@ APP_TEMPLATE = """
                     <p>Don't have an account? <a href="/register">Register</a></p>
                 {% endif %}
             </div>
-        <h4><li><b>White Papers</b> - <b>https://zencrypt.gitbook.io/zencrypt</b></li>
-        <li><b>ePortfolio</b> - <i>https://www.ryanshatch.com</i></li></h4>
-        <hr>
-
+            <a>
+                <li><b>White Papers</b> - <b>https://zencrypt.gitbook.io/zencrypt</b></li>
+                <li><b>ePortfolio</b> - <i>https://www.ryanshatch.com</i></li>
+            </a>
+            <hr>
+            <div class="triforce">
+       /\       
+      /  \      
+     /____\     
+    /\    /\    
+   /  \  /  \   
+  /____\/____\  
+            </div>
         {% endif %}
     </div>
 </body>
 </html>
 """
 
-#* ---------------------- | Web-App Routes | ---------------------- #
+# * ---------------------- | Web-App Routes | ---------------------- #
+# * Checks if the database is connected and returns an error message if not connected when the webapp is started.
 def safe_db_operation(operation): 
     if db is None:                                      # Check if the database is connected
         return None, "Database not connected"           # Return an error message if the database is not connected
@@ -225,79 +285,96 @@ def safe_db_operation(operation):
         return None, str(e)                             # Return no result and an error message if the operation fails
 
 #* ---------------------- | Favicon Route | ---------------------- #
-@app.route('/favicon.ico')
+@app.route('/favicon.ico') # Route to the favicon of the web-app to show my Y00t
 def favicon():
-    return send_from_directory(
-        os.path.join(app.root_path, 'static'),
+    return send_from_directory( 
+        os.path.join(app.root_path, 'static'), # Gets the icon from the static directory
         'favicon.ico',
-        mimetype='image/vnd.microsoft.icon'
+        mimetype='image/vnd.microsoft.icon'   # Sets the icon format to ico because icons arent displayed in the browser without this mimetype.
     )
 
 #* ---------------------- | Authentication Routes | ---------------------- #
-@app.route('/login', methods=['GET', 'POST'])           # Route for user login
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':                        # If the request method is POST, for example, when the form is submitted
-        email = request.form.get('email')               # Get the email input from the form
-        password = request.form.get('password')         # Get the password input from the form
+    if request.method == 'POST':                # Check if the request method is POST
+        email = request.form.get('email')       # If it is, get the email from the form
+        password = request.form.get('password') # Get the password from the form
         
-        def find_user():                                # Define a function to find the user in the database
-            return db.users.find_one({'email': email})  # Find the user in the database by email
+        user = User.query.filter_by(email=email).first() # Query the database for the user email
         
-        user, error = safe_db_operation(find_user)      # Perform the database operation to find the user
+        if user and check_password_hash(user.password_hash, password): # Check if the user exists and the password is correct
+            session['user_id'] = user.id # Set the user id in the session
+            access_token = create_access_token(identity=user.id) # Create an access token for the user
+            session['access_token'] = access_token # Set the access token in the session
+            return redirect(url_for('hash_page')) # Redirect the user to the hash page
         
-        if error:
-            return render_template_string(APP_TEMPLATE, error=f"Database error: {error}") # Catch any database errors and display an error message
-        
-        if user and check_password_hash(user['password'], password):      # Check to see whether the user exists and if the password is correct
-            session['user_id'] = str(user['_id'])                         # Set the user ID in the session
-            access_token = create_access_token(identity=str(user['_id'])) # Create an access token for the user
-            session['access_token'] = access_token                        # Set the access token in the session
-            return redirect(url_for('hash_page'))                         # Redirect the user to the hash page after successful login
-        
-        return render_template_string(APP_TEMPLATE, error="Invalid credentials") # Display an error message for invalid credentials
+        return render_template_string(APP_TEMPLATE, error="Invalid credentials") # Return an error message if the credentials are invalid
     
-    return render_template_string(APP_TEMPLATE)                           # Render the login template
+    return render_template_string(APP_TEMPLATE) # Return the app template if the request method is not POST
 
-@app.route('/register', methods=['GET', 'POST'])                          # Route for user registration
+#* ---------------------- | Registration Route | ---------------------- #
+@app.route('/register', methods=['GET', 'POST'])    # Route to the registration page of the web-app
 def register():
-    if request.method == 'POST':                    # If the request method is POST, for example, when the form is submitted
-        email = request.form.get('email')           # Get the email input from the form
-        password = request.form.get('password')     # Get the password input from the form
+    if request.method == 'POST':                # Check if the request method is POST
+        email = request.form.get('email')    # If it is, get the email from the form
+        password = request.form.get('password') # Get the password from the form
         
-        if not email or not password:               # Check if email and password are provided
-            return render_template_string(APP_TEMPLATE, error="Email and password are required")
+        if not email or not password:        # Check if the email and password are empty
+            return render_template_string(APP_TEMPLATE,     # Return an error message if the email and password are empty
+                error="Email and password are required")    # Return an error message if the email and password are empty
             
-        user = db.users.find_one({'email': email})  # Check if the user already exists in the database
-        if user:
-                                                    # Return an error message if the user already exists
-            return render_template_string(APP_TEMPLATE, error="Email already exists")
+        if User.query.filter_by(email=email).first():   # Check if the user email already exists in the database
+            return render_template_string(APP_TEMPLATE,     # Return an error message if the email already exists
+                error="Email already exists")             # Return an error message if the email already exists
         
-        try:
-            hashed_password = generate_password_hash(password)  # Generate a hashed password for the user
-            # Insert the user into the database
-            db.users.insert_one({
-                'email': email,
-                'password': hashed_password
-            })
-            return redirect(url_for('login')) # Redirect the user to the login page after successful registration
-        except Exception as e:
-            return render_template_string(APP_TEMPLATE, error=f"Registration failed: {str(e)}") # Return an error message if registration fails
+        try:    # Try to create a new user with the email and password
+            user = User(
+                email=email,
+                password_hash=generate_password_hash(password)  # Generate a password hash for the user
+            )
+            db.session.add(user)    # Add the user to the database
+            db.session.commit()    # Commit the changes to the database
+            return redirect(url_for('login'))   # Redirect the user to the login page
+        except Exception as e:  # Catch any exceptions that occur during the registration process
+            db.session.rollback()   # Rollback the database session if an exception occurs
+            return render_template_string(APP_TEMPLATE,
+                error=f"Registration failed: {str(e)}")    # Return an error message if the registration fails
     
-    return render_template_string(APP_TEMPLATE)
+    return render_template_string(APP_TEMPLATE) # Return the app template if the request method is not POST
 
-@app.route('/logout') # Route for user logout and clear the session
+#* ---------------------- | Logout Route | ---------------------- #
+@app.route('/logout')   # Route to the logout page of the web-app
 def logout():
-    session.clear() # Clear the session
-    return redirect(url_for('login')) # Redirect the user to the login page after logout
+    session.pop('user_id', None)        # Remove the user id from the session
+    session.pop('access_token', None)   # Remove the access token from the session
+    return redirect(url_for('login'))   # Redirect the user to the login page
 
-#* ---------------------- | Routes for Encryption and Decryption | ---------------------- #
-@app.route('/', methods=['GET', 'POST']) # Route to the home page of the web-app with the hash function
+#* --- | Logout - Old method for logout where the user data was deleted from the database | --- #
+# @app.route('/logout')   # Route to the logout page of the web-app
+# def logout():
+#     user_id = session.get('user_id')    # Get the user id from the session
+#     if user_id: # Check if the user id exists in the session
+#     #* ---------------------- | Deleting Logged Data | ---------------------- #
+#         try:
+#             # Clean up user data
+#             Hash.query.filter_by(user_id=user_id).delete()
+#             EncryptedText.query.filter_by(user_id=user_id).delete()
+#             # Deactivate user's keys
+#             Key.query.filter_by(user_id=user_id, active=True).update({"active": False})
+#             db.session.commit()
+#         except Exception as e:
+#             db.session.rollback()
+#             print(f"Error cleaning up user data: {e}")
+#         pass # Placeholder for the cleanup code
+#     session.clear() # Clear the session data when the user logs out
+#     return redirect(url_for('login'))   # Redirect the user to the login page
+
+#* ---------------------- | Encryption & Decryption Routes | ---------------------- #
+@app.route('/', methods=['GET', 'POST']) # Route to the hash page of the web-app with the hash function
 def hash_page():
-    if not session.get('user_id'): # Check if the user is logged in
-        return redirect(url_for('login')) # Redirect the user to the login page if not logged in
+    if not session.get('user_id'): # Check if the user id exists in the session
+        return redirect(url_for('login')) # Redirect the user to the login page if the user id does
     
-    output = None # Initialize the output variable to None
-    # HTML form for the hash page
     content = """
     <form method="POST">
         <textarea name="text" placeholder="Enter text to hash"></textarea>
@@ -306,88 +383,110 @@ def hash_page():
     </form>
     """
     
-    if request.method == 'POST':
-        text = request.form.get('text', '') # Get the text input from the form
-        salt = request.form.get('salt', '') # Get the salt input from the form
+    if request.method == 'POST': # Check if the request method is POST
+        text = request.form.get('text', '') # Get the text from the form and set it to an empty string if it is empty
+        salt = request.form.get('salt', '') # Get the salt from the form and set it to an empty string if it is empty
         if text:
-            hash_input = (text + salt).encode() # Concatenate the text and salt and encode as bytes
-            hash_output = hashlib.sha256(hash_input).hexdigest() # Generate the SHA256 hash from the input
-            output = f"SHA256 Hash:\n{hash_output}" # Set the output to the hash output with a message
+            hash_value = hashlib.sha256((text + salt).encode()).hexdigest() # Generate a SHA256 hash value for the text and salt
             
-            def store_hash():
-                return db.hashes.insert_one({ # Store the hash in the database with the user ID and salt
-                    'userId': session['user_id'],
-                    'hash': hash_output,
-                    'salt': salt
-                })
+            #* Create a new hash entry in the database with the hash value, salt, and user id
+            new_hash = Hash(
+                hash_value=hash_value,
+                salt=salt,
+                user_id=session['user_id']
+            )
+            db.session.add(new_hash)
+            db.session.commit()
             
-            _, error = safe_db_operation(store_hash) # Perform the database operation to store the hash
-            if error:
-                output += f"\n\nWarning: Hash not saved to database: {error}" # Display a warning message if the hash is not saved to the database
+            #* Return the webapp template with the content and the hash value
+            return render_template_string(APP_TEMPLATE,
+                content=content,
+                output=f"SHA256 Hash:\n{hash_value}")
     
-    return render_template_string(APP_TEMPLATE, content=content, output=output) # Render the template with the content and output variables
+    return render_template_string(APP_TEMPLATE, content=content) # Return the webapp template with the content
 
-@app.route('/encrypt', methods=['GET', 'POST']) # Route to the encrypt text page of the web-app with the encryption function
+#* ---------------------- | Encryption Route | ---------------------- #
+@app.route('/encrypt', methods=['GET', 'POST'])
 def encrypt_page():
-    if not session.get('user_id'):              # Check if the user is logged in
-        return redirect(url_for('login'))       # Redirect the user to the login page if not logged in
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
     
-    output = None                               # Initialize the output variable to None
-    # HTML form for the encryption page
     content = """
     <form method="POST">
         <textarea name="text" placeholder="Enter text to encrypt"></textarea>
+        <br>
         <button type="submit">Encrypt</button>
     </form>
     """
     
     if request.method == 'POST':
-        text = request.form.get('text', '')                         # Get the text input from the form
+        text = request.form.get('text', '')
         if text:
             try:
-                encrypted = cipher_suite.encrypt(text.encode())     # Encrypt the text input using the cipher suite
-                output = f"Encrypted Text:\n{encrypted.decode()}"   # Set the output to the encrypted text with a message
+                cipher_suite = get_cipher_suite(session['user_id'])
+                encrypted = cipher_suite.encrypt(text.encode())
                 
-                # Store the encrypted text in the database with the user ID and salt
-                db.encrypted_texts.insert_one({
-                    'userId': session['user_id'],
-                    'encryptedText': encrypted.decode()
-                })
-            except Exception as e:                                              # Catch any exceptions that occur during encryption
-                output = f"Error: {str(e)}"
+                # Store in database
+                new_encrypted = EncryptedText(
+                    encrypted_content=encrypted.decode(),
+                    user_id=session['user_id']
+                )
+                db.session.add(new_encrypted)
+                db.session.commit()
+                
+                return render_template_string(APP_TEMPLATE,
+                    content=content,
+                    output=f"Encrypted Text:\n{encrypted.decode()}")
+            except Exception as e:
+                db.session.rollback()
+                return render_template_string(APP_TEMPLATE,
+                    content=content,
+                    output=f"Error: {str(e)}")
     
-    return render_template_string(APP_TEMPLATE, content=content, output=output) # Render the template with the content and the output variables
+    return render_template_string(APP_TEMPLATE, content=content)
 
-#* Route to the decrypt text page of the web-app with the decryption function
+#* ---------------------- | Decryption Route | ---------------------- #
 @app.route('/decrypt', methods=['GET', 'POST'])
 def decrypt_page():
-    output = None
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+    
     content = """
     <form method="POST">
         <textarea name="text" placeholder="Enter text to decrypt"></textarea>
+        <br>
         <button type="submit">Decrypt</button>
     </form>
     """
     
     if request.method == 'POST':
-        text = request.form.get('text', '')                         # Get the text input from the form
+        text = request.form.get('text', '')
         if text:
             try:
-                decrypted = cipher_suite.decrypt(text.encode())     # Decrypt the text input using the cipher suite
-                output = f"Decrypted Text:\n{decrypted.decode()}"   # Set the output to the decrypted text with a message
+                cipher_suite = get_cipher_suite(session['user_id'])
+                decrypted = cipher_suite.decrypt(text.encode())
+                return render_template_string(APP_TEMPLATE,
+                    content=content,
+                    output=f"Decrypted Text:\n{decrypted.decode()}")
             except Exception as e:
-                output = f"Error: {str(e)}"                                     # Catch any exceptions that occur during decryption and display an error message
+                return render_template_string(APP_TEMPLATE,
+                    content=content,
+                    output=f"Error: {str(e)}")
     
-    return render_template_string(APP_TEMPLATE, content=content, output=output) # Render the template with the content and output variables
+    return render_template_string(APP_TEMPLATE, content=content)
 
+#* ---------------------- | File Operations Route | ---------------------- #
 #* Route to the file operations page of the web-app with the file encryption/decryption function
 @app.route('/file', methods=['GET', 'POST'])
 def file_page():
-    output = None
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+    
     content = """
     <form method="POST" enctype="multipart/form-data">
         <input type="file" name="file" required>
         <input type="password" name="password" placeholder="Password" required>
+        <br>
         <select name="operation">
             <option value="encrypt">Encrypt</option>
             <option value="decrypt">Decrypt</option>
@@ -397,37 +496,157 @@ def file_page():
     """
     
     if request.method == 'POST':
-        if 'file' not in request.files:                                                 # Check if a file is uploaded
-            output = "No file uploaded"                                                 # Catch an error if no file is uploaded
-            return render_template_string(APP_TEMPLATE, content=content, output=output) # Render the template with the content and output variables
+        if 'file' not in request.files:
+            return render_template_string(APP_TEMPLATE,
+                content=content,
+                output="No file uploaded")
             
-        file = request.files['file']                         # Get the uploaded file from the form
-        password = request.form.get('password', '').encode() # Get the password input from the form and encode as bytes
-        operation = request.form.get('operation')            # Get the operation input from the form
-        
-        if file.filename == '':                                                         # Check if the file name is empty
-            output = "No file selected"                                                 # Catch an error if no file is selected
-            return render_template_string(APP_TEMPLATE, content=content, output=output) # Render the template with the content and output variables
+        file = request.files['file']
+        if file.filename == '':
+            return render_template_string(APP_TEMPLATE,
+                content=content,
+                output="No file selected")
             
         try:
-            file_content = file.read()  # Read the content of the uploaded file
-            salt = os.urandom(16)       # Generate a random salt for encryption
+            file_content = file.read()
+            salt = os.urandom(16)
+            password = request.form.get('password', '').encode()
+            operation = request.form.get('operation')
             
-            if operation == 'encrypt':                                                           # Check if the operation is encryption
-                encrypted = cipher_suite.encrypt(file_content)                                   # Encrypt the file content using the cipher suite
-                output = f"File encrypted successfully:\n{base64.b64encode(encrypted).decode()}" # Set the output to the encrypted file content with a message
+            cipher_suite = get_cipher_suite(session['user_id'])
+            if operation == 'encrypt':
+                encrypted = cipher_suite.encrypt(file_content)
+                output = f"File encrypted successfully:\n{base64.b64encode(encrypted).decode()}"
             else:
-                decrypted = cipher_suite.decrypt(base64.b64decode(file_content)) # Decrypt the file content using the cipher suite
-                output = f"File decrypted successfully:\n{decrypted.decode()}"   # Set the output to the decrypted file content with a message
+                decrypted = cipher_suite.decrypt(base64.b64decode(file_content))
+                output = f"File decrypted successfully:\n{decrypted.decode()}"
+                
+            return render_template_string(APP_TEMPLATE,
+                content=content,
+                output=output)
         except Exception as e:
-            output = f"Error processing file: {str(e)}"                          # Catch any exceptions that occur during file processing and display an error message
+            return render_template_string(APP_TEMPLATE,
+                content=content,
+                output=f"Error processing file: {str(e)}")
     
-    return render_template_string(APP_TEMPLATE, content=content, output=output)  # Render the template with the content and output variables
+    return render_template_string(APP_TEMPLATE, content=content)
+
+#* ---------------------- | Export Keys Route | ---------------------- #
+@app.route('/export_keys', methods=['GET']) 
+@jwt_required(optional=True) # Check if the user is logged in via JWT token
+def export_keys():           # Check if the user is logged in via session
+    if not session.get('user_id'): return redirect(url_for('login'))
+    # Retrieve the active key for the user from the database
+    key = Key.query.filter_by(user_id=session['user_id'], active=True).first()
+
+    if key:
+        output = f"Your active key is:\n{key.key_value}"
+        return render_template_string(APP_TEMPLATE, content="", output=output)
+    else:
+        return render_template_string(APP_TEMPLATE, content="", output="No active key found.")
+    
+#* ---------------------- | Import Keys Route | ---------------------- #
+@app.route('/import_keys', methods=['GET', 'POST'])
+def import_keys():
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+    
+    form_html = """
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="key_file" required>
+        <button type="submit">Import Key</button>
+    </form>
+    """
+    
+    if request.method == 'POST':
+        if 'key_file' not in request.files:
+            return render_template_string(APP_TEMPLATE, content=form_html, output="No file uploaded.")
+        
+        file = request.files['key_file']
+        if file.filename == "":
+            return render_template_string(APP_TEMPLATE, content=form_html, output="No file selected.")
+        
+        try:
+            key_data = file.read().strip()
+            # Start by trying to decrypt the key data using the current active key for the user using Fernet.
+            Fernet(key_data)
+            
+            # Deactivate any existing active key for the user.
+            current_key = Key.query.filter_by(user_id=session['user_id'], active=True).first()
+            if current_key:
+                current_key.active = False
+            
+            # Save the imported key as the new active key.
+            new_key_entry = Key(
+                key_value=key_data.decode(),  # storing as string
+                user_id=session['user_id']
+            )
+            db.session.add(new_key_entry)
+            db.session.commit()
+            message = "Key imported successfully and activated."
+        except Exception as e:
+            db.session.rollback()
+            message = f"Error importing key: {e}"
+        
+        return render_template_string(APP_TEMPLATE, content=form_html, output=message)
+    
+    return render_template_string(APP_TEMPLATE, content=form_html)
+# * Old method for exporting keys:
+# @app.route('/export_keys', methods=['GET'])
+# def export_keys():
+#     if not session.get('user_id'):
+#         return redirect(url_for('login'))
+        
+#     user_id = session['user_id']
+#     key_record = Key.query.filter_by(user_id=user_id, active=True).first()
+    
+#     # If no key pair found or keys are missing, generate a new set
+#     if not key_record or not key_record.public_key or not key_record.private_key:
+#         private_key, public_key = generate_pgp_keys()
+        
+#         # Serialize keys to PEM format
+#         private_pem = private_key.private_bytes(
+#             encoding=serialization.Encoding.PEM,
+#             format=serialization.PrivateFormat.PKCS8,
+#             encryption_algorithm=serialization.NoEncryption()
+#         ).decode()
+        
+#         public_pem = public_key.public_bytes(
+#             encoding=serialization.Encoding.PEM,
+#             format=serialization.PublicFormat.SubjectPublicKeyInfo
+#         ).decode()
+        
+#         if not key_record:
+#             key_record = Key(
+#                 key_value='',  # optional legacy field
+#                 public_key=public_pem,
+#                 private_key=private_pem,
+#                 active=True,
+#                 user_id=user_id
+#             )
+#             db.session.add(key_record)
+#         else:
+#             key_record.public_key = public_pem
+#             key_record.private_key = private_pem
+        
+#         db.session.commit()
+#     else:
+#         public_pem = key_record.public_key
+#         private_pem = key_record.private_key
+
+#     content = f"""
+#     <h2>Your RSA Key Pair</h2>
+#     <h3>Public Key:</h3>
+#     <pre>{public_pem}</pre>
+#     <h3>Private Key:</h3>
+#     <pre>{private_pem}</pre>
+#     """
+#     return render_template_string(APP_TEMPLATE, content=content)
 
 #<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 #* TRIFORCE ASCII ART BANNER FOR THE WEB-APP     <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 #<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-
+# #* ---------------------- | Triforce ASCII Art Banner | ---------------------- #
 BOLD = '\033[1m'
 END = '\033[0m'
 
@@ -455,5 +674,5 @@ def print_startup_banner():
 
 #* Main function to run the Flask application
 if __name__ == '__main__':
-    print_startup_banner()                          # Displays the Triforce, ePortfolio, and Zencrypt documentation in the console when the webapp is started
-    app.run(debug=True, host='0.0.0.0', port=5000)  # Runs the Flask application on a local server with debug mode enabled
+    print_startup_banner()                           # Displays the Triforce, ePortfolio, and Zencrypt documentation in the console when the webapp is started
+    app.run(debug=False, host='0.0.0.0', port=5000)  # Runs the Flask application on a local server with debug mode disabled
