@@ -13,7 +13,6 @@
 |       - Encrypt text and files: using Fernet symmetric encryption algorithm.             |
 <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 -->
-
 <div class="table-of-contents">
   <h1>Table of contents</h1>
   <h2>Webapp v5.3-A3</h2>
@@ -73,7 +72,6 @@
 <!DOCTYPE html>
 <html>
   <body>
-    <hr>
     <h1 align="center">Zencrypt</h1>
     <hr>
     <br>
