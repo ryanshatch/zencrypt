@@ -4,19 +4,25 @@
 * Developed by: Ryan Hatch         |********************************************************
 * Date: August 10th 2022           |********************************************************
 * Last Updated: January 22nd 2025  |********************************************************
-* Version: 5.3-A3                  |********************************************************
+* Version: 4.2-a1                  |********************************************************
 * ******************************************************************************************
 * <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+* <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+* - 1/20/25 - updated comments                                                             *
 ********************************| Description: |********************************************
 *              Zencrypt CLI is a Python based application that can be used to:             *
 *       - Generate hashes: using SHA256 hashing algorithm, with an optional salt value.    *
 *       - Encrypt text and files: using Fernet symmetric encryption algorithm.             *
 *       - PGP Encryption: using RSA asymmetric encryption algorithm, with key handling.    *
 ********************************************************************************************
-| For the CLI I decided to keep the code to the webapp and the CLI seperated.              *
-| I am going to use an old version of Zencrypt (v4.2-B1) for optimal functionality.        *
-********************************************************************************************
 """
+
+#* Old CLI Code For Reference Below:
+#
+############################################################################################
+#*                                  Zencrypt CLI v5.0.1
+############################################################################################
+#* Developed by: Ryan Hatch
 
 #* Importing the required Libraries for building the CLI
 import hashlib
@@ -36,13 +42,15 @@ from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives.serialization import load_pem_public_key
 from cryptography.hazmat.primitives import serialization
 
-#* The name of the .key file.
-KEY_FILE = "zen.key"                       # This is a private key file that is used to encrypt and decrypt the text.
+#* Global Variables:
 
-#* Saves the key to a new key file with the default name: `zen.key`
+#* The name of the .key file.
+KEY_FILE = "zencryptv5.key" # This is a private key file that is used to encrypt and decrypt the text.
+
+#* Saves the key to a new key file with the default name: `zencryptv5.key`
 def save_key_to_file(key):                 # saves the key to the key file
     with open(KEY_FILE, "wb") as key_file: # opens the key file in `write binary` mode
-        key_file.write(key)                # writes the key to the key file
+        key_file.write(key)               # writes the key to the key file
 
 #* Loads the key from the .key file and then returns the name of the key file
 def load_key_from_file():                  # loads the key from the key file
@@ -68,7 +76,6 @@ def copy_to_clipboard(text):                 # function to copy the output text 
     pyperclip.copy(text)                     # uses pyperclip to copy the output text to the clipboard
     print("\n\nOutput copied to clipboard.") # prints a message to the user that the output has been copied
 
-""" Key Generation Section """
 #* Generates a key using the password and salt
 def generate_key(password, salt):  # generates a key using the password and salt
     kdf = PBKDF2HMAC(              # uses the PBKDF2HMAC algorithm to generate the key
@@ -81,7 +88,6 @@ def generate_key(password, salt):  # generates a key using the password and salt
 
     return kdf.derive(password) # returns the key that is derived from the password and salt
 
-""" Text Encryption Section """
 #* Decrypts the text using AES symmetric encryption
 def decrypt_text(): # function to decrypt the text using AES symmetric encryption
     try:
@@ -109,8 +115,7 @@ def encrypt_text():
         # uses error handling to catch any exceptions during the encryption process
         print(f"\nError during encryption: {e}") # prints an error message to the user if an error occurs
         return None                              # returns `None` if an error occurs
-
-""" File Encryption Section """    
+    
 #* Encrypts the file using AES symmetric encryption
 def encrypt_file(input_file, output_file, password):
     # function to encrypt the file using AES symmetric encryption with a password and salt 
@@ -153,6 +158,9 @@ def decrypt_file(input_file, output_file, password):
     with open(output_file, 'wb') as file:
         # opens the output file in `write binary` mode and writes the decrypted data to the file
         file.write(decrypted_data)      # writes the decrypted data to the output file
+
+
+""" PGP Variables Section """
 
 #* PGP Encryption Functions:
 def generate_pgp_keys():                    # generates the PGP keys for RSA asymmetric encryption
@@ -468,7 +476,7 @@ def print_menu(sha256_hash):                        # This is the Main Menu for 
     else:                               # if the user enters an invalid input for error handling
         print("\nInvalid Input.")       # prints a message to the user that the input is invalid
 
-def verify_hash():                                  # This is the Verify Hash Menu for the Zencrypt CLI
+def verify_hash():                      # This is the Verify Hash Menu for the Zencrypt CLI
     try:                                                    # uses error handling to catch any exceptions during the verification process
         input_hash = input("\nEnter the hash to verify: ")  # prompts the user to enter the hash that they would like to verify
         original_text = input("\nEnter the original text to verify against the hash: ") # prompts the user to enter the original text to verify against the hash
@@ -514,3 +522,566 @@ print("                     /\\  /\\  /\\  /\\")
 print("                    /__\\/__\\/__\\/__\\")
 print("\n\n")
 main_menu()                                             # runs the main menu for the Zencrypt CLI under the Triforce banner
+
+
+# # ----------------------------
+# #  Existing imports
+# # ----------------------------
+
+# import hashlib
+# import getpass
+# import os
+# import pyperclip
+# import base64
+
+# from flask import send_from_directory
+# from cryptography.fernet import Fernet
+# from cryptography.hazmat.primitives import hashes
+# from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+# from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+# from cryptography.hazmat.backends import default_backend
+# from cryptography.hazmat.backends import default_backend
+# from cryptography.hazmat.primitives import hashes
+# from cryptography.hazmat.primitives.asymmetric import rsa, padding
+# from cryptography.hazmat.primitives.serialization import load_pem_public_key
+# from cryptography.hazmat.primitives import serialization
+
+# # ----------------------------
+# #  Global Variables
+# # ----------------------------
+
+# KEY_FILE = "private.key"
+
+# def save_key_to_file(key):
+#     with open(KEY_FILE, "wb") as key_file:
+#         key_file.write(key)
+
+# def load_key_from_file():
+#     with open(KEY_FILE, "rb") as key_file:
+#         return key_file.read()
+
+# if not os.path.exists(KEY_FILE):
+#     key = Fernet.generate_key()
+#     save_key_to_file(key)
+# else:
+#     key = load_key_from_file()
+
+# cipher_suite = Fernet(key)
+
+
+# # ----------------------------
+# #  Clipboard / Helper Functions
+# # ----------------------------
+
+# def clear_clipboard() -> None:
+#     pyperclip.copy('')
+#     print("\n\nClipboard cleared.")
+
+# def copy_to_clipboard(text):
+#     pyperclip.copy(text)
+#     print("\n\nOutput copied to clipboard.")
+
+# def generate_key(password, salt):
+#     kdf = PBKDF2HMAC(
+#         algorithm=hashes.SHA256(),
+#         length=32,
+#         salt=salt,
+#         iterations=100000,
+#         backend=default_backend()
+#     )
+#     return kdf.derive(password)
+
+# # ----------------------------
+# #  Encryption / Decryption
+# # ----------------------------
+
+# def decrypt_text():
+#     try:
+#         encrypted_text = input("\nEnter the encrypted text to decrypt: ")
+#         decrypted_text = cipher_suite.decrypt(encrypted_text.encode()).decode()
+#         print(f"\nDecrypted Text: {decrypted_text}")
+#     except Exception as e:
+#         print(f"\nError during decryption: {e}")
+
+# def encrypt_text():
+#     try:
+#         text_to_encrypt = input("\nEnter the text to encrypt: ")
+#         encrypted_text = cipher_suite.encrypt(text_to_encrypt.encode()).decode()
+#         print(f"\nEncrypted Text: {encrypted_text}")
+#         return encrypted_text
+#     except Exception as e:
+#         print(f"\nError during encryption: {e}")
+#         return None
+
+# def encrypt_file(input_file, output_file, password):
+#     salt = os.urandom(16)
+#     key_derived = generate_key(password, salt)
+#     iv = os.urandom(16)
+
+#     with open(input_file, 'rb') as file:
+#         plaintext = file.read()
+
+#     cipher = Cipher(algorithms.AES(key_derived), modes.CFB(iv), backend=default_backend())
+#     encryptor = cipher.encryptor()
+#     ciphertext = encryptor.update(plaintext) + encryptor.finalize()
+
+#     with open(output_file, 'wb') as file:
+#         file.write(salt + iv + ciphertext)
+
+# def decrypt_file(input_file, output_file, password):
+#     with open(input_file, 'rb') as file:
+#         data = file.read()
+
+#     salt = data[:16]
+#     iv = data[16:32]
+#     ciphertext = data[32:]
+
+#     key_derived = generate_key(password, salt)
+
+#     cipher = Cipher(algorithms.AES(key_derived), modes.CFB(iv), backend=default_backend())
+#     decryptor = cipher.decryptor()
+#     decrypted_data = decryptor.update(ciphertext) + decryptor.finalize()
+
+#     with open(output_file, 'wb') as file:
+#         file.write(decrypted_data)
+
+# # ----------------------------
+# #  PGP Functions
+# # ----------------------------
+
+# def generate_pgp_keys():
+#     private_key = rsa.generate_private_key(
+#         public_exponent=65537,
+#         key_size=2048,
+#         backend=default_backend()
+#     )
+#     public_key = private_key.public_key()
+#     return private_key, public_key
+
+# def encrypt_pgp_message(message, public_key):
+#     encrypted = public_key.encrypt(
+#         message.encode(),
+#         padding.OAEP(
+#             mgf=padding.MGF1(algorithm=hashes.SHA256()),
+#             algorithm=hashes.SHA256(),
+#             label=None
+#         )
+#     )
+#     return encrypted
+
+# def decrypt_pgp_message(encrypted_message, private_key):
+#     decrypted = private_key.decrypt(
+#         encrypted_message,
+#         padding.OAEP(
+#             mgf=padding.MGF1(algorithm=hashes.SHA256()),
+#             algorithm=hashes.SHA256(),
+#             label=None
+#         )
+#     )
+#     return decrypted.decode()
+
+# def export_public_key_to_file(public_key, filename):
+#     public_key_pem = public_key.public_bytes(
+#         encoding=serialization.Encoding.PEM,
+#         format=serialization.PublicFormat.SubjectPublicKeyInfo
+#     )
+#     with open(filename, 'wb') as f:
+#         f.write(public_key_pem)
+
+# def import_public_key_from_file(filename):
+#     with open(filename, 'rb') as f:
+#         public_key_pem = f.read()
+#     public_key = load_pem_public_key(public_key_pem, backend=default_backend())
+#     return public_key
+
+
+# # ----------------------------
+# #  CLI Menus
+# # ----------------------------
+
+# def main_menu():
+#     while True:
+#         print("\n\n\n")
+#         print("=><=" * 20)
+#         print("************************|  Main Menu  |*****************************************")
+#         print("=><=" * 20)
+#         print("********************************************************************************")
+#         print("* 1 | Hash Manager      |*******************************************************")
+#         print("* 2 | Encrypt Text      |*******************************************************")
+#         print("* 3 | Encrypt Files     |*******************************************************")
+#         print("* 4 | PGP Encryption    |*******************************************************")
+#         print("********************************************************************************")
+#         print("* 5 | Clear Clipboard   |*******************************************************")
+#         print("* 6 | Exit              |*******************************************************")
+#         print("********************************************************************************")
+#         print("\n\n")
+
+#         choice = input("Enter Option: ")
+#         if choice == "1":
+#             main_loop()   # Hash Manager
+#         elif choice == "2":
+#             encryption_manager()
+#         elif choice == "3":
+#             parse_files_menu()
+#         elif choice == "4":
+#             pgp_encryption_menu()
+#         elif choice == "5":
+#             clear_clipboard()
+#         elif choice == "6":
+#             break
+#         else:
+#             print("\nInvalid Input.")
+
+# def pgp_encryption_menu():
+#     private_key, public_key = generate_pgp_keys()
+#     message = ""
+
+#     while True:
+#         print("\n\n\n")
+#         print("=><=" * 20)
+#         print("************************|  PGP Encryption  |************************************")
+#         print("=><=" * 20)
+#         print("********************************************************************************")
+#         print("* 1 | Encrypt Message    |******************************************************")
+#         print("* 2 | Decrypt Message    |******************************************************")
+#         print("********************************************************************************")
+#         print("* 3 | Export Public Key  |******************************************************")
+#         print("* 4 | Import Public Key  |******************************************************")
+#         print("********************************************************************************")
+#         print("* 5 | Copy to Clipboard  |******************************************************")
+#         print("* 6 | Clear Clipboard    |******************************************************")
+#         print("********************************************************************************")
+#         print("* 7 | Back to Main Menu  |******************************************************")
+#         print("********************************************************************************")
+#         print("\n\n")
+
+#         choice = input("Enter Option: ")
+#         if choice == "1":
+#             message_to_encrypt = input("\nEnter the message to encrypt: ")
+#             encrypted_message = encrypt_pgp_message(message_to_encrypt, public_key)
+#             message = base64.b64encode(encrypted_message).decode()
+#             print("\nEncrypted Message:", message)
+#         elif choice == "2":
+#             encrypted_message = input("\nEnter the message to decrypt (Base64): ")
+#             try:
+#                 decoded_message = base64.b64decode(encrypted_message)
+#                 decrypted_message = decrypt_pgp_message(decoded_message, private_key)
+#                 message = decrypted_message
+#                 print("\nDecrypted Message:", decrypted_message)
+#             except Exception as e:
+#                 print(f"\nError during decryption: {e}")
+#         elif choice == "3":
+#             filename = input("\nEnter filename to save public key: ")
+#             export_public_key_to_file(public_key, filename)
+#             print(f"Public key exported to {filename}")
+#         elif choice == "4":
+#             filename = input("\nEnter filename to import public key from: ")
+#             try:
+#                 public_key = import_public_key_from_file(filename)
+#                 print(f"Public key imported from {filename}")
+#             except Exception as e:
+#                 print(f"\nError during importing public key: {e}")
+#         elif choice == "5":
+#             if message:
+#                 copy_to_clipboard(message)
+#             else:
+#                 print("\n\nNo message to copy.")
+#         elif choice == "6":
+#             clear_clipboard()
+#         elif choice == "7":
+#             break
+#         else:
+#             print("\nInvalid Input.")
+
+# def parse_files_menu():
+#     while True:
+#         print("\n\n\n")
+#         print("=><=" * 20)
+#         print("************************|  Encrypt Files  |*************************************")
+#         print("=><=" * 20)
+#         print("********************************************************************************")
+#         print("* 1 | Encrypt File      |*******************************************************")
+#         print("* 2 | Decrypt File      |*******************************************************")
+#         print("********************************************************************************")
+#         print("* 3 | Clear Clipboard   |*******************************************************")
+#         print("********************************************************************************")
+#         print("* 4 | Return To Hashing |*******************************************************")
+#         print("********************************************************************************")
+#         print("\n\n")
+
+#         choice = input("Enter Option: ")
+#         if choice == "1":
+#             encrypt_file_menu()
+#         elif choice == "2":
+#             decrypt_file_menu()
+#         elif choice == "3":
+#             clear_clipboard()
+#         elif choice == "4":
+#             break
+#         else:
+#             print("\nInvalid Input.")
+
+# def encrypt_file_menu():
+#     try:
+#         input_file = input("\nEnter the path to the file to encrypt: ")
+#         output_file = input("Enter the path for the encrypted file: ")
+#         password = getpass.getpass("Enter the encryption password: ").encode()
+#         encrypt_file(input_file, output_file, password)
+#         print("Encryption complete.")
+#     except Exception as e:
+#         print(f"\nError during encryption: {e}")
+
+# def decrypt_file_menu():
+#     try:
+#         input_file = input("\nEnter the path to the encrypted file: ")
+#         output_file = input("Enter the path for the decrypted file: ")
+#         password = getpass.getpass("Enter the decryption password: ").encode()
+#         decrypt_file(input_file, output_file, password)
+#         print("Decryption complete.")
+#     except Exception as e:
+#         print(f"\nError during decryption: {e}")
+
+# def encryption_manager():
+#     while True:
+#         print("\n\n\n")
+#         print("=><=" * 20)
+#         print("************************|  Encrypt Text  |**************************************")
+#         print("=><=" * 20)
+#         print("********************************************************************************")
+#         print("* 1 | Clear Clipboard   |*******************************************************")
+#         print("********************************************************************************")
+#         print("* 2 | Encrypt Text      |*******************************************************")
+#         print("* 3 | Decrypt Text      |*******************************************************")
+#         print("********************************************************************************")
+#         print("* 4 | Return to Hashing |*******************************************************")
+#         print("********************************************************************************")
+#         print("\n\n")
+
+#         choice = input("Enter Option: ")
+#         if choice == "1":
+#             clear_clipboard()
+#         elif choice == "2":
+#             encrypted_text = encrypt_text()
+#             if encrypted_text:
+#                 copy_to_clipboard(encrypted_text)
+#         elif choice == "3":
+#             decrypt_text()
+#         elif choice == "4":
+#             break
+#         else:
+#             print("\nInvalid Input.")
+
+# def print_menu(sha256_hash):
+#     print("\n\n\n")
+#     print("=><=" * 20)
+#     print("************************|  Hash Manager  |**************************************")
+#     print("=><=" * 20)
+#     print("********************************************************************************")
+#     print("* 1 | Generate Hash     |*******************************************************")
+#     print("* 2 | Verify Hash       |*******************************************************")
+#     print("********************************************************************************")
+#     print("* 3 | Clear Clipboard   |*******************************************************")
+#     print("* 4 | Copy Output       |*******************************************************")
+#     print("********************************************************************************")
+#     print("* 5 | Encrypt Text Menu |*******************************************************")
+#     print("* 6 | Encrypt File Menu |*******************************************************")
+#     print("* 7 | PGP Encryption    |*******************************************************")
+#     print("********************************************************************************")
+#     print("* 8 | Close Zencrypt    |*******************************************************")
+#     print("********************************************************************************")
+#     print("\n\n")
+
+#     answer = input("\nEnter Option: ")
+#     if answer == "1":
+#         main_loop()
+#     elif answer == "2":
+#         verify_hash()
+#     elif answer == "3":
+#         clear_clipboard()
+#     elif answer == "4":
+#         copy_to_clipboard(sha256_hash)
+#     elif answer == "5":
+#         encryption_manager()
+#     elif answer == "6":
+#         parse_files_menu()
+#     elif answer == "7":
+#         pgp_encryption_menu()
+#     elif answer == "8":
+#         exit()
+#     else:
+#         print("\nInvalid Input.")
+
+# def verify_hash():
+#     try:
+#         input_hash = input("\nEnter the hash to verify: ")
+#         original_text = input("\nEnter the original text to verify against the hash: ")
+#         salt = input("Enter the salt value used during hashing: ")
+#         computed_hash = hashlib.sha256((original_text + salt).encode()).hexdigest()
+
+#         if computed_hash == input_hash:
+#             print("\nHash successfully verified.")
+#         else:
+#             print("\nVerification unsuccessful. Hash does not match.")
+#     except Exception as e:
+#         print(f"\nError during verification: {e}")
+
+# def main_loop():
+#     counter = 0
+#     while True:
+#         text = getpass.getpass(prompt="\nEnter text: ")
+#         if text == "exit":
+#             break
+#         counter += 1
+#         try:
+#             salt = input("Enter salt value:")
+#             sha256_hash = hashlib.sha256((text + salt).encode()).hexdigest()
+#             print("\nOutput:\n")
+#             print(sha256_hash)
+#             print_menu(sha256_hash)
+#         except Exception as e:
+#             print(f"\nError: {e}")
+
+#     input("\nPress Enter To Exit.")
+
+
+# # -------------------------------------------------------------------------
+# #   Triforce banner & CLI start
+# # -------------------------------------------------------------------------
+
+# BOLD = '\033[1m'
+# END = '\033[0m'
+
+# ASCII_PYRAMID = f"""{BOLD}
+
+#                            /\\
+#                           /__\\
+#                          /\\  /\\
+#                         /__\\/__\\
+#                        /\\      /\\
+#                       /__\\    /__\\
+#                      /\\  /\\  /\\  /\\
+#                     /__\\/__\\/__\\/__\\
+                    
+# {END}
+# """
+
+# print(ASCII_PYRAMID)
+
+# #* Old Triforce Banner Method (Not in bold)
+# # print("\n")
+# # print("                           /\\")
+# # print("                          /__\\")
+# # print("                         /\\  /\\")
+# # print("                        /__\\/__\\")
+# # print("                       /\\      /\\")
+# # print("                      /__\\    /__\\")
+# # print("                     /\\  /\\  /\\  /\\")
+# # print("                    /__\\/__\\/__\\/__\\")
+# # print("\n\n")
+
+# # main_menu()  # Moving to safegaurd below.
+
+# # -------------------------------------------------------------------------
+# #   v5.2 Flask Integration
+# # -------------------------------------------------------------------------
+
+# import argparse
+# import os
+# from cryptography.fernet import Fernet
+# from flask import Flask, request, render_template_string
+# from flask import send_from_directory
+
+
+# app = Flask(__name__)
+
+# # Create static folder if it doesn't exist
+# if not os.path.exists('static'):
+#     os.makedirs('static')
+    
+# @app.route('/favicon.ico')
+# def favicon():
+#     return send_from_directory(os.path.join(app.root_path, 'static'),
+#                              'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+# HTML_FORM = """
+# <!DOCTYPE html>
+# <html>
+# <head>
+#     <title>Zencrypt Web-App</title>
+#     <link rel="shortcut icon" type="image/vnd.microsoft.icon" href="/favicon.ico">
+# </head>
+# <body>
+# <h2>Zencrypt Web-Application: <code>Encrypt</code> or <code>Decrypt</code> text.</h2>
+# <hr>
+# <form method="POST" action="/">
+#     <label><bold>Input <code>TEXT</code>:</bold></label><br>
+#     <textarea name="plaintext" rows="4" cols="50">{{ plaintext }}</textarea><br><br>
+#     <input type="submit" name="action" value="Encrypt"/>
+#     <input type="submit" name="action" value="Decrypt"/>
+# </form>
+
+# {% if output %}
+#     <h2><bold>Output:</bold></h2>
+#     <pre>{{ output }}</pre>
+# {% endif %}
+# </body>
+# </html>
+# """
+
+# @app.route("/", methods=["GET", "POST"])
+# def index():
+#     plaintext = ""
+#     output = None
+
+#     if request.method == "POST":
+#         action = request.form.get("action")
+#         plaintext = request.form.get("plaintext", "").strip()
+
+#         if action == "Encrypt":
+#             if plaintext:
+#                 try:
+#                     enc = cipher_suite.encrypt(plaintext.encode()).decode()
+#                     output = f"Encrypted text:\n{enc}"
+#                 except Exception as ex:
+#                     output = f"Error encrypting: {ex}"
+#             else:
+#                 output = "No plaintext provided."
+#         elif action == "Decrypt":
+#             if plaintext:
+#                 try:
+#                     dec = cipher_suite.decrypt(plaintext.encode()).decode()
+#                     output = f"Decrypted text:\n{dec}"
+#                 except Exception as ex:
+#                     output = f"Error decrypting: {ex}"
+#             else:
+#                 output = "No text to decrypt."
+
+#     return render_template_string(HTML_FORM, plaintext=plaintext, output=output)
+
+# def run_web_server():
+#     # print("Zencrypt Web Application v5.2 is Developed And Owned Entirely By Ryanshatch\nZencrypt Whitepapers and Docs - https://zencrypt.gitbook.io/zencrypt\nRyanshatch ePortfolio - https://www.ryanshatch.com\n\n")
+#     # print("Thank you for using my Zencrypt v5.2 Cipher, the Web App is now successfully up and running:\nhttp://localhost:5000/\n\n")
+#         # Bold text using ANSI escape codes
+#     BOLD = '\033[1m'
+#     END = '\033[0m'
+    
+#     print(f"{BOLD}Zencrypt Web Application{END} v5.2 {BOLD}is Developed And Owned Entirely By Ryanshatch{END}\n")
+#     print(f"Zencrypt {BOLD}Whitepapers and Docs{END} - {BOLD}https://zencrypt.gitbook.io/zencrypt{END}")
+#     print(f"Ryanshatch {BOLD}ePortfolio{END} - {BOLD}https://www.ryanshatch.com{END}\n")
+#     print(f"Thank you for using my Zencrypt {BOLD}v5.2{END} Cipher, the Web App is now successfully up and running:")
+#     print(f"{BOLD}http://localhost:5000/{END}\n\n")
+#     app.run(debug=True, port=5000)
+
+# # -------------------------------------------------------------------------
+# #   Main entry point
+# # -------------------------------------------------------------------------
+# if __name__ == "__main__":
+#     parser = argparse.ArgumentParser(description="Zencrypt: CLI or Web")
+#     parser.add_argument("--mode", choices=["cli", "web"], default="web",
+#                         help="Select 'cli' for the classic CLI menu or 'web' to launch a Flask server.")
+#     args = parser.parse_args()
+
+#     if args.mode == "web":
+#         run_web_server()
+#     else:
+#         main_menu()
