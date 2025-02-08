@@ -4,12 +4,8 @@
 * Developed by: Ryan Hatch         |********************************************************
 * Date: August 10th 2022           |********************************************************
 * Last Updated: January 27th 2025  |********************************************************
-* Version: 5.3                     |********************************************************
+* Version: 5-A3                    |********************************************************
 ********************************************************************************************
-<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-| - 1/21/25 - Created webapp v5.3                                                          |
-| - 1/27/25 - Updated the comments and cleanliness of the code                             |
-<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 ********************************#* Description: |*******************************************
 <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 *              Zencrypt Web-App is a Flask application that can be used to:                *
@@ -18,10 +14,6 @@
 <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 ********************************************************************************************
 """
-# # Import from zencrypt_cli so the user can use the CLI functions in the web-app
-# from zencrypt_cli import (
-#     generate_key,
-# )
 
 #* Import libraries for the web-app
 from cryptography.fernet import Fernet
@@ -30,6 +22,7 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.serialization import load_pem_public_key
 import hashlib
 import os
@@ -67,6 +60,12 @@ def generate_pgp_keys():                         #* generates a pair of PGP keys
 
     return private_key, private_key.public_key() #* returns the private and public keys for the user
 
+def export_public_key(public_key: rsa.RSAPublicKey) -> bytes: #* exports the public key to a PEM format
+    return public_key.public_bytes(                              #* returns the public key in bytes
+        encoding=serialization.Encoding.PEM,                      # The encoding is set to PEM
+        format=serialization.PublicFormat.SubjectPublicKeyInfo    # The format is set to SubjectPublicKeyInfo
+    )
+
 def encrypt_file(input_file: str, output_file: str, password: bytes): #* encrypts the file using AES encryption with a password
     salt = os.urandom(16)                   # generates a random salt for the encryption
     key = generate_key(password, salt)      # generates a key from the password and the salt
@@ -90,9 +89,9 @@ def decrypt_file(input_file: str, output_file: str, password: bytes): #* decrypt
     iv = data[16:32]                # gets the iv from the file
     ciphertext = data[32:]          # gets the ciphertext from the file
 
-    key = generate_key(password, salt)                   # generates a key from the password and the salt
-    cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend()) # creates a cipher object with the key and iv
-    decryptor = cipher.decryptor()                       # creates a decryptor object from the cipher object
+    key = generate_key(password, salt)                                              # generates a key from the password and the salt
+    cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())  # creates a cipher object with the key and iv
+    decryptor = cipher.decryptor()                                                  # creates a decryptor object from the cipher object
     decrypted_data = decryptor.update(ciphertext) + decryptor.finalize() #* decrypts the ciphertext and finalizes the decryption
 
     with open(output_file, 'wb') as file:                #* opens the output file in write mode
