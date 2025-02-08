@@ -37,12 +37,12 @@ from cryptography.hazmat.primitives.serialization import load_pem_public_key
 from cryptography.hazmat.primitives import serialization
 
 #* The name of the .key file.
-KEY_FILE = "zen.key"                       # This is a private key file that is used to encrypt and decrypt the text.
+KEY_FILE = "zen.key" # This is a private key file that is used to encrypt and decrypt the text.
 
 #* Saves the key to a new key file with the default name: `zen.key`
 def save_key_to_file(key):                 # saves the key to the key file
     with open(KEY_FILE, "wb") as key_file: # opens the key file in `write binary` mode
-        key_file.write(key)                # writes the key to the key file
+        key_file.write(key)               # writes the key to the key file
 
 #* Loads the key from the .key file and then returns the name of the key file
 def load_key_from_file():                  # loads the key from the key file
@@ -68,7 +68,6 @@ def copy_to_clipboard(text):                 # function to copy the output text 
     pyperclip.copy(text)                     # uses pyperclip to copy the output text to the clipboard
     print("\n\nOutput copied to clipboard.") # prints a message to the user that the output has been copied
 
-""" Key Generation Section """
 #* Generates a key using the password and salt
 def generate_key(password, salt):  # generates a key using the password and salt
     kdf = PBKDF2HMAC(              # uses the PBKDF2HMAC algorithm to generate the key
@@ -81,7 +80,6 @@ def generate_key(password, salt):  # generates a key using the password and salt
 
     return kdf.derive(password) # returns the key that is derived from the password and salt
 
-""" Text Encryption Section """
 #* Decrypts the text using AES symmetric encryption
 def decrypt_text(): # function to decrypt the text using AES symmetric encryption
     try:
@@ -109,8 +107,7 @@ def encrypt_text():
         # uses error handling to catch any exceptions during the encryption process
         print(f"\nError during encryption: {e}") # prints an error message to the user if an error occurs
         return None                              # returns `None` if an error occurs
-
-""" File Encryption Section """    
+    
 #* Encrypts the file using AES symmetric encryption
 def encrypt_file(input_file, output_file, password):
     # function to encrypt the file using AES symmetric encryption with a password and salt 
@@ -153,6 +150,9 @@ def decrypt_file(input_file, output_file, password):
     with open(output_file, 'wb') as file:
         # opens the output file in `write binary` mode and writes the decrypted data to the file
         file.write(decrypted_data)      # writes the decrypted data to the output file
+
+
+""" PGP Variables Section """
 
 #* PGP Encryption Functions:
 def generate_pgp_keys():                    # generates the PGP keys for RSA asymmetric encryption
