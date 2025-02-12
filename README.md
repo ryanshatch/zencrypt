@@ -35,8 +35,8 @@ Version: 2.0                     ***********************************************
     <br>
     <p align="center">
       <strong>Hash and Cipher Command Line Interface:</strong>
-<!--       <br>
-      <strong>By: Ryan Hatch</strong> -->
+      <br>
+      <strong>By: Ryan Hatch</strong>
       <br>
     </p>
     <p align="center">
@@ -44,7 +44,7 @@ Version: 2.0                     ***********************************************
     </p>
     <hr>
     <p align="center">
-<!--       <br> -->
+      <br>
       <strong>Developed By: Ryan Hatch</strong>
     <p align="center"> &copy; 2025 Ryan Hatch <br> All Rights Reserved.<br><i>This software is proprietary and owned by Ryan Hatch. Unauthorized use, modification, or distribution is prohibited.</i> </p>
     <h4>Last updated: Jan 20 2025 - Updated comments and added a more simple structure for the changes to be made.</h2>
@@ -63,8 +63,8 @@ Version: 2.0                     ***********************************************
       </li>
       <li>
         <strong>Encrypt and decrypt text.</strong>
-<!--       </li> -->
-      <!-- <li><strong>Verify hashes.</strong></li> -->
+      </li>
+     <li><strong>Verify hashes.</strong></li>
       <li>
         <strong>Encrypt and decrypt files.</strong>
       </li>
@@ -119,21 +119,6 @@ Version: 2.0                     ***********************************************
     </center>
     </p>
     <hr><br>
-    <hr><br>
-    <h2 align="center" id="contributing">Contributing</h2>
-    <ol>
-      <p align="center">
-        <strong>Please reach out to me to verify and validate your ideas and contributions before continuing any further. Although contributions may be welcome, it will be discussed first. <br>
-          <br> After reaching out to me, please follow these steps: </strong>
-        <br>
-        <li>Fork the repository.</li>
-        <li>Create a new branch with the command: <code>git checkout -b feature-branch</code>.
-        <li>Make your changes.</li>
-        <li>Commit your changes with the command: <code>git commit -am 'Add new feature'</code>.
-        <li>Push to the branch with the command: <code>git push origin feature-branch</code>.
-        <li>Create a new Pull Request.</li>
-    </ol>
-<!--     <h1></h1> -->
     <h1 align="center" id="disclaimer">DISCLAIMER!</h1>
     <p align="center">
       <strong>
@@ -173,7 +158,7 @@ Version: 2.0                     ***********************************************
       </strong>
       </br>
     </p>
-    <!-- <strong>This script is provided for educational and demonstration purposes only. Use it responsibly and adhere to all applicable laws and regulations.</strong></br></p> -->
+ <strong>This script is provided for educational and demonstration purposes only. Use it responsibly and adhere to all applicable laws and regulations.</strong></br></p>
     <p align="center">
       <strong>
         <code>I am absolutely immune from any responsibility in regaurds to any damages or loss of data caused by the <br>use, abuse, or misuse of this software. </code>
