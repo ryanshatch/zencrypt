@@ -132,22 +132,82 @@
       <li>Open a web browser and navigate to <code>http://localhost:5000</code>. </li>
       <li>Use the webapp to hash, encrypt, and decrypt text and files. </li>
     </ol>
-    <h2 id="examples">Examples of CLI (v4-B1) Functionality:</h2>
+    <hr>
+    <p>PGP Functionality:
+    Users and how it ties with their email within the PGP functionality to lookup the public key of the recipient within the database for encryption/ decryption.
+
+The process is:
+
+User enters recipient's email
+System looks up that user in the database
+Gets that user's public PGP key
+Uses that public key to encrypt the message
+This follows the standard PGP encryption workflow where:
+
+Messages are encrypted using the recipient's public key
+Only the recipient can decrypt it using their private key
+No actual emails are sent - it's just used as an identifier to find the right public key
+Think of it like a mailbox system - you need someone's address (email) to look up their mailbox (public key) to send them an encrypted message.
+
+In your code, the "Recipient's email" is not used for sending emails - it's used to look up the recipient's PGP public key in the database for encryption. Here's how it works:
+</p>
+
+```python
+@app.route('/pgp/encrypt', methods=['POST'])
+def pgp_encrypt():
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+
+    message = request.form.get('message')
+    recipient_email = request.form.get('recipient_email')
+    
+    try:
+        # Right here it looks up the recipient user by their email
+        recipient = User.query.filter_by(email=recipient_email).first()
+        if not recipient:
+            return "Recipient not found", 404
+            
+        # Get recipient's public key from database    
+        recipient_key = PGPKey.query.filter_by(user_id=recipient.id, active=True).first()
+        if not recipient_key:
+            return "Recipient has no active PGP key", 400
+            
+        # Use recipient's public key to encrypt the message
+        encrypted = pgp_encrypt_message(message, recipient_key.public_key)
+        return render_template_string(APP_TEMPLATE,
+            content="Encrypted message:<br><textarea readonly>%s</textarea>" % encrypted)
+    except Exception as e:
+        return f"Error encrypting message: {str(e)}", 500
+```
+
+The process I am using is:
+1. The user will enter the recipients email enters recipient's email
+2. The System looks for that user in the database using the email as the unique identifier
+3. Gets that user's public PGP key from the database
+4. Uses that public key stored in the database to encrypt the message
+
+This follows the standard PGP encryption workflow where:
+- Messages are encrypted using the recipient's public key
+- Only the recipient can decrypt things using their private key
+- No actual emails are sent, so the email is just used as an identifier to find the right public key
+<br>
+<hr>
+    <h2 id="examples">Examples of CLI (v4.2-alpha) Functionality:</h2>
     <h3 align="center">Hashing:</h3>
     <center>
-      <img alt="Hashing Example" src="https://github.com/ryanshatch/Zencrypt/blob/main/zencrypthash.png" style="width: 100%; height: 100%;" />
+      <img alt="Hashing Example" src="https://github.com/ryanshatch/zencrypt/blob/v6.2.2-alpha/img/zencrypthash.png" style="width: 100%; height: 100%;" />
     </center>
     <h3 align="center">Cipher:</h3>
     <center>
-      <img alt="Cipher Example" src="https://github.com/ryanshatch/Zencrypt/blob/main/zencrypt.PNG" style="width: 100%; height: 100%;" />
+      <img alt="Cipher Example" src="https://github.com/ryanshatch/zencrypt/blob/v6.2.2-alpha/img/zencrypt.PNG" style="width: 100%; height: 100%;" />
     </center>
     <h3 align="center">Encrypting Parsed Files:</h3>
     <center>
-      <img alt="Cipher Example" src="https://github.com/ryanshatch/Zencrypt/blob/main/encrypt.PNG" style="width: 100%; height: 50%;" />
+      <img alt="Cipher Example" src="https://github.com/ryanshatch/zencrypt/blob/v6.2.2-alpha/img/encrypt.PNG" style="width: 100%; height: 50%;" />
     </center>
         <h3 align="center">PGP Encryption:</h3>
     <center>
-      <img alt="Cipher Example" src="https://github.com/ryanshatch/Zencrypt/blob/main/pgpencryption.PNG" style="width: 100%; height: 50%;" />
+      <img alt="Cipher Example" src="https://github.com/ryanshatch/zencrypt/blob/v6.2.2-alpha/img/pgpencryption.PNG" style="width: 100%; height: 50%;" />
     </center>
     </p>
     <hr><br>
