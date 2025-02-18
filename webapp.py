@@ -143,25 +143,118 @@ STYLE_TEMPLATE = """
         color: #ffffff;
         font-family: 'Nunito Sans', sans-serif;
         line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh; 
+        min-height: -webkit-fill-available;
+        display: flex;
+        flex-direction: column;
+    }
+    .container {
+        width: 95%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        flex: 1;
+    }
+    .form-container {
+        width: 95%;
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: center;
+    }
+    .form-container form {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .form-container form > * {
+        width: 100%;
+    }
+    .button-wrapper {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin-top: 10px;
+    }
+    textarea, input[type="text"], input[type="password"], input[type="email"] {
+        width: 100%;
+        padding: 15px;
+        margin-bottom: 20px;
+        font-size: 16px;
+        border-radius: 5px;
+        background-color: #2d2d2d;
+        color: #ffffff;
+        border: 1px solid #444;
+        transition: border-color 0.3s ease;
+    }
+    textarea {
+        height: 10vh;
+        resize: vertical;
+    }
+    textarea:focus, input:focus {
+        border-color: #0066ff;
+        outline: none;
+    }
+    button {
+        width: 100%;
+        max-width: 300px;
+        padding: 15px;
+        font-size: 16px;
+        border-radius: 5px;
+        background-color: #0066ff;
+        color: #ffffff;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    button:hover {
+        background-color: #0052cc;
+    }
+    .menu {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        margin: 20px 0;
     }
     .menu form {
-    margin: 0;
-    padding: 0;
+        margin: 0;
+        padding: 0;
     }
-
     .menu input[type="file"] {
         display: none;
     }
-
     .menu button {
-        margin: 0 5px;
+        margin: 0;
+        padding: 8px 16px;
+        white-space: nowrap;
     }
     .auth-container {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
+        width: 90%;
+        max-width: 400px;
+        margin: 20px auto;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    @media (max-width: 768px) {
+        .container {
+            width: 95%;
+            padding: 10px;
+        }
+        .menu {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .menu button {
+            width: 100%;
+            margin: 5px 0;
+        }
+    }
 """
 
 # Define header/banner separately as it's reused
@@ -192,7 +285,7 @@ APP_TEMPLATE = f"""
     <style>
         {STYLE_TEMPLATE}
         .links a {{
-            color: #0066ff;
+            color: rgba(0, 102, 255, 1);
             text-decoration: none;
         }}
         .links a:hover {{
@@ -205,37 +298,28 @@ APP_TEMPLATE = f"""
         {HEADER_TEMPLATE}
         
         {{% if session.get('user_id') %}}
-        <!---    <h4>With this web-app you can:</h4>
-            <ul>
-                <li>Hash text using SHA256, Encrypt text, Decrypt text.</li>
-                <li>Handle Encrypting and Decrypting Uploaded Files securely and online.</li>
-            </ul>  -->
-                <div class="menu">
-                    <a href="/"><button>Hash</button></a>
-                    <a href="/encrypt"><button>Encrypt</button></a>
-                    <a href="/decrypt"><button>Decrypt</button></a>
-                    <a href="/file"><button>File Operations</button></a>
-                    <a href="/export-key"><button>Export Key</button></a>
-                    <form style="display: inline;" action="/import-key" method="POST" enctype="multipart/form-data">
-                        <input type="file" name="key_file" style="display: none;" id="key_file">
-                        <button type="button" onclick="document.getElementById('key_file').click()">Import Key</button>
-                        <script>
-                            document.getElementById('key_file').onchange = function() {{
-                                this.form.submit();
-                            }};
-                        </script>
-                    </form>
-                    <a href="/pgp"><button>PGP Operations</button></a>
-                    <a href="/logout"><button>Logout</button></a>
-                </div>
-<!--            <div class="menu">
+            <div class="menu">
                 <a href="/"><button>Hash</button></a>
                 <a href="/encrypt"><button>Encrypt</button></a>
                 <a href="/decrypt"><button>Decrypt</button></a>
-                <a href="/file"><button>File Operations</button></a>
+                <a href="/file"><button>Files</button></a>
+                <a href="/pgp"><button>PGP</button></a>
+            </div>
+            <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0));">
+            <div class="menu">
+                <a href="/export-key"><button>Export Key</button></a>
+                <form style="display: inline;" action="/import-key" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="key_file" style="display: none;" id="key_file">
+                    <button type="button" onclick="document.getElementById('key_file').click()">Import Key</button>
+                    <script>
+                        document.getElementById('key_file').onchange = function() {{
+                            this.form.submit();
+                        }};
+                    </script>
+                </form>
                 <a href="/logout"><button>Logout</button></a>
-            </div>  -->
-            <hr>
+            </div>
+            <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 102, 255, 0), rgba(0, 102, 255, 0.75), rgba(0, 102, 255, 0));">
             {{{{ content | safe }}}}
             {{% if output %}}
                 <div class="output">{{{{ output }}}}</div>
@@ -257,7 +341,7 @@ APP_TEMPLATE = f"""
                     <p>Don't have an account? <a href="/register">Register</a></p>
                 {{% endif %}}
             </div>
-            <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0,102,255,0), rgba(0,102,255,0.75), rgba(0,102,255,0));">
+            <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 102, 255, 0), rgba(0, 102, 255, 0.75), rgba(0, 102, 255, 0));">
             <div class="links">
                 <h6>
                 <ul>
@@ -266,7 +350,7 @@ APP_TEMPLATE = f"""
                 </ul>
                 </h6>
             </div>
-            <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0,102,255,0), rgba(0,102,255,0.75), rgba(0,102,255,0));">
+            <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 102, 255, 0), rgba(0, 102, 255, 0.75), rgba(0, 102, 255, 0));">
         {{% endif %}}
     </div>
 </body>
@@ -373,12 +457,15 @@ def hash_page():
         return redirect(url_for('login'))
     
     content = """
-    <form method="POST">
-        <textarea name="text" placeholder="Enter text to hash"></textarea>
-        <br>
-        <input type="text" name="salt" placeholder="Salt (optional)">
-        <button type="submit">Generate Hash</button>
-    </form>
+    <div class="form-container">
+        <form method="POST">
+            <textarea name="text" placeholder="Enter text to hash"></textarea>
+            <input type="text" name="salt" placeholder="Salt (optional)">
+            <div class="button-wrapper">
+                <button type="submit">Generate Hash</button>
+            </div>
+        </form>
+    </div>
     """
     
     if request.method == 'POST':
@@ -407,11 +494,14 @@ def encrypt_page():
         return redirect(url_for('login'))
     
     content = """
-    <form method="POST">
-        <textarea name="text" placeholder="Enter text to encrypt"></textarea>
-        <br>
-        <button type="submit">Encrypt</button>
-    </form>
+    <div class="form-container">
+        <form method="POST">
+            <textarea name="text" placeholder="Enter text to encrypt"></textarea>
+            <div class="button-wrapper">
+                <button type="submit">Encrypt</button>
+            </div>
+        </form>
+    </div>
     """
     
     if request.method == 'POST':
@@ -447,11 +537,14 @@ def decrypt_page():
         return redirect(url_for('login'))
     
     content = """
-    <form method="POST">
-        <textarea name="text" placeholder="Enter text to decrypt"></textarea>
-        <br>
-        <button type="submit">Decrypt</button>
-    </form>
+    <div class="form-container">
+        <form method="POST">
+            <textarea name="text" placeholder="Enter text to decrypt"></textarea>
+            <div class="button-wrapper">
+                <button type="submit">Decrypt</button>
+            </div>
+        </form>
+    </div>
     """
     
     if request.method == 'POST':
@@ -478,16 +571,19 @@ def file_page():
         return redirect(url_for('login'))
     
     content = """
-    <form method="POST" enctype="multipart/form-data">
-        <input type="file" name="file" required>
-        <br>
-        <input type="password" name="password" placeholder="Password" required>
-        <select name="operation">
-            <option value="encrypt">Encrypt</option>
-            <option value="decrypt">Decrypt</option>
-        </select>
-        <button type="submit">Process File</button>
-    </form>
+    <div class="form-container">
+        <form method="POST" enctype="multipart/form-data"><br>
+            <input type="file" name="file" required><br>
+            <input type="password" name="password" placeholder="Password" required>
+            <select name="operation" style="width: 100%; padding: 15px; margin-bottom: 20px; background-color: #2d2d2d; color: #ffffff; border: 1px solid #444; border-radius: 5px;">
+                <option value="encrypt">Encrypt</option>
+                <option value="decrypt">Decrypt</option>
+            </select>
+            <div class="button-wrapper">
+                <button type="submit">Process File</button>
+            </div>
+        </form>
+    </div>
     """
     
     if request.method == 'POST':
@@ -580,22 +676,26 @@ def pgp_page():
         return redirect(url_for('login'))
     
     content = """
-    <form method="POST" action="/pgp/generate">
-        <button type="submit">Generate New PGP Key Pair</button>
-    </form>
-    <hr>
-    <form method="POST" action="/pgp/encrypt">
-        <textarea name="message" placeholder="Enter message to encrypt"></textarea>
-        <br>
-        <input type="text" name="recipient_email" placeholder="Recipient's email">
-        <button type="submit">Encrypt Message</button>
-    </form>
-    <hr>
-    <form method="POST" action="/pgp/decrypt">
-        <textarea name="encrypted_message" placeholder="Enter message to decrypt"></textarea>
-        <br>
-        <button type="submit">Decrypt Message</button>
-    </form>
+    <div class="form-container">
+        <form method="POST" action="/pgp/generate">
+            <div class="button-wrapper">
+                <button type="submit">Generate New PGP Key Pair</button>
+            </div>
+        </form>
+        <form method="POST" action="/pgp/encrypt">
+            <textarea name="message" placeholder="Enter message to encrypt"></textarea>
+            <input type="text" name="recipient_email" placeholder="Recipient's email">
+            <div class="button-wrapper">
+                <button type="submit">Encrypt Message</button>
+            </div>
+        </form>
+        <form method="POST" action="/pgp/decrypt">
+            <textarea name="encrypted_message" placeholder="Enter message to decrypt"></textarea>
+            <div class="button-wrapper">
+                <button type="submit">Decrypt Message</button>
+            </div>
+        </form>
+    </div>
     """
     
     return render_template_string(APP_TEMPLATE, content=content)
