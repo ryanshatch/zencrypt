@@ -3,13 +3,9 @@
 * Utils.py                         |********************************************************
 * Developed by: Ryan Hatch         |********************************************************
 * Date: August 10th 2022           |********************************************************
-* Last Updated: January 27th 2025  |********************************************************
-* Version: 5.3                     |********************************************************
+* Last Updated: Febuary 13th 2025  |********************************************************
+* Version: v6.2-A                  |********************************************************
 ********************************************************************************************
-<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-| - 1/21/25 - Created webapp v5.3                                                          |
-| - 1/27/25 - Updated the comments and cleanliness of the code                             |
-<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 ********************************#* Description: |*******************************************
 <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 *              Zencrypt Web-App is a Flask application that can be used to:                *
@@ -18,10 +14,6 @@
 <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 ********************************************************************************************
 """
-# # Import from zencrypt_cli so the user can use the CLI functions in the web-app
-# from zencrypt_cli import (
-#     generate_key,
-# )
 
 #* Import libraries for the web-app
 from cryptography.fernet import Fernet
@@ -30,7 +22,7 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
-from cryptography.hazmat.primitives.serialization import load_pem_public_key
+from cryptography.hazmat.primitives import serialization as crypto_serialization
 import hashlib
 import os
 import base64
@@ -108,3 +100,62 @@ def generate_key(password: bytes, salt: bytes) -> bytes: #* generates a key from
     )
 
     return kdf.derive(password)     # derives the key from the password and the salt using the KDF - Key Derivation Function
+
+#* PGP Encryption Functions
+def generate_pgp_keypair():
+    private_key = rsa.generate_private_key(
+        public_exponent=65537,
+        key_size=2048,
+        backend=default_backend()
+    )
+    
+    # Serialize private key
+    private_pem = private_key.private_bytes(
+        encoding=crypto_serialization.Encoding.PEM,
+        format=crypto_serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=crypto_serialization.NoEncryption()
+    )
+    
+    # Serialize public key
+    public_pem = private_key.public_key().public_bytes(
+        encoding=crypto_serialization.Encoding.PEM,
+        format=crypto_serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+    
+    return private_pem.decode(), public_pem.decode()
+
+def pgp_encrypt_message(message: str, public_key_pem: str) -> str:
+    public_key = crypto_serialization.load_pem_public_key(
+        public_key_pem.encode(),
+        backend=default_backend()
+    )
+    
+    encrypted = public_key.encrypt(
+        message.encode(),
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+    
+    return base64.b64encode(encrypted).decode()
+
+def pgp_decrypt_message(encrypted_message: str, private_key_pem: str) -> str:
+    private_key = crypto_serialization.load_pem_private_key(
+        private_key_pem.encode(),
+        password=None,
+        backend=default_backend()
+    )
+    
+    encrypted_bytes = base64.b64decode(encrypted_message)
+    decrypted = private_key.decrypt(
+        encrypted_bytes,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+    
+    return decrypted.decode()
