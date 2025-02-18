@@ -156,13 +156,19 @@ STYLE_TEMPLATE = """
     .menu button {
         margin: 0 5px;
     }
+    .auth-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
 """
 
 # Define header/banner separately as it's reused
 HEADER_TEMPLATE = """
     <div class="header">
         <h1 style="text-align: center; font-family: 'Arial', sans-serif; font-size: 2.5em; margin-bottom: 0.3em;">
-            Zencrypt v5.3-A2
+            Zencrypt v6.2.2-alpha
         </h1>
         <div style="text-align: center; font-family: 'Helvetica', sans-serif; color: #999;">
             <p style="font-size: 1.1em; margin: 0.5em 0;">
