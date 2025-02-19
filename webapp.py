@@ -180,7 +180,7 @@ STYLE_TEMPLATE = """
         margin-top: 10px;
     }
     textarea, input[type="text"], input[type="password"], input[type="email"] {
-        width: 100%;
+        width: 75%;
         padding: 15px;
         margin-bottom: 20px;
         font-size: 16px;
@@ -255,14 +255,74 @@ STYLE_TEMPLATE = """
             margin: 5px 0;
         }
     }
+    .navbar {
+        background-color: #1e1e1e;
+        border-bottom: 1px solid #444;
+        padding: 1rem;
+        position: fixed;
+        width: 100%;
+        top: 0;
+        z-index: 1000;
+    }
+    .navbar-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    .navbar-brand {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #ffffff;
+        cursor: pointer;
+        user-select: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .navbar-menu {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: #1e1e1e;
+        border-bottom: 1px solid #444;
+    }
+    .navbar-menu.active {
+        max-height: 500px;
+    }
+    .navbar-menu a {
+        display: block;
+        padding: 0.5rem 1rem;
+        text-decoration: none;
+        color: #ffffff;
+    }
+    .navbar-menu button {
+        width: 100%;
+        text-align: left;
+        padding: 0.8rem;
+        background: none;
+        border: none;
+        color: #ffffff;
+        transition: background-color 0.2s;
+    }
+    .navbar-menu button:hover {
+        background-color: #2d2d2d;
+    }
+    .navbar-divider {
+        height: 1px;
+        background-color: #444;
+        margin: 0.5rem 0;
+    }
+    .main-content {
+        margin-top: 70px; /* Adjust based on navbar height */
+    }
 """
 
 # Define header/banner separately as it's reused
 HEADER_TEMPLATE = """
     <div class="header">
-        <h1 style="text-align: center; font-family: 'Arial', sans-serif; font-size: 2.5em; margin-bottom: 0.3em;">
-            Zencrypt v6.2.2-alpha
-        </h1>
         <div style="text-align: center; font-family: 'Helvetica', sans-serif; color: #999;">
             <p style="font-size: 1.1em; margin: 0.5em 0;">
                 <span style="font-family: 'Consolas', monospace;">© 2025</span> 
@@ -270,7 +330,6 @@ HEADER_TEMPLATE = """
                 <span style="font-family: 'Consolas', monospace; color: #0066ff;">Ryanshatch</span>
             </p>
         </div>
-        <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0,102,255,0), rgba(0,102,255,0.75), rgba(0,102,255,0));">
     </div>
 """
 
@@ -282,43 +341,37 @@ APP_TEMPLATE = f"""
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zencrypt Web-App</title>
+    <link rel="icon" href="{{ url_for('favicon') }}" type="image/vnd.microsoft.icon">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600&display=swap">
     <style>
         {STYLE_TEMPLATE}
-        .links a {{
-            color: rgba(0, 102, 255, 1);
-            text-decoration: none;
-        }}
-        .links a:hover {{
-            text-decoration: underline;
-        }}
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="main-content">
         {HEADER_TEMPLATE}
         
         {{% if session.get('user_id') %}}
-            <div class="menu">
-                <a href="/"><button>Hash</button></a>
-                <a href="/encrypt"><button>Encrypt</button></a>
-                <a href="/decrypt"><button>Decrypt</button></a>
-                <a href="/file"><button>Files</button></a>
-                <a href="/pgp"><button>PGP</button></a>
-            </div>
-            <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0));">
-            <div class="menu">
-                <a href="/export-key"><button>Export Key</button></a>
-                <form style="display: inline;" action="/import-key" method="POST" enctype="multipart/form-data">
-                    <input type="file" name="key_file" style="display: none;" id="key_file">
-                    <button type="button" onclick="document.getElementById('key_file').click()">Import Key</button>
-                    <script>
-                        document.getElementById('key_file').onchange = function() {{
-                            this.form.submit();
-                        }};
-                    </script>
-                </form>
-                <a href="/logout"><button>Logout</button></a>
-            </div>
+            <nav class="navbar">
+                <div class="navbar-container">
+                    <div class="navbar-brand" onclick="toggleMenu()">
+                        ☰ Zencrypt Web-App
+                        <span style="font-size: 1.2rem;"></span>
+                    </div>
+                    <div class="navbar-menu" id="navMenu">
+                        <a href="/"><button>Hash</button></a>
+                        <a href="/encrypt"><button>Encrypt</button></a>
+                        <a href="/decrypt"><button>Decrypt</button></a>
+                        <div class="navbar-divider"></div>
+                        <a href="/file"><button>Files</button></a>
+                        <a href="/pgp"><button>PGP</button></a>
+                        <div class="navbar-divider"></div>
+                        <a href="/export-key"><button>Export Key</button></a>
+                        <a href="/import-key"><button>Import Key</button></a>
+                        <a href="/logout"><button>Logout</button></a>
+                    </div>
+                </div>
+            </nav>
             <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 102, 255, 0), rgba(0, 102, 255, 0.75), rgba(0, 102, 255, 0));">
             {{{{ content | safe }}}}
             {{% if output %}}
@@ -342,17 +395,33 @@ APP_TEMPLATE = f"""
                 {{% endif %}}
             </div>
             <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 102, 255, 0), rgba(0, 102, 255, 0.75), rgba(0, 102, 255, 0));">
+            <h1 style="text-align: center;">Zencrypt Web-App</h1>
             <div class="links">
-                <h6>
-                <ul>
+                <h6 style="text-align: center;">
                 <li><b>White Papers</b> - <a href="https://zencrypt.gitbook.io/zencrypt" target="_blank">https://zencrypt.gitbook.io/zencrypt</a></li>
                 <li><b>ePortfolio</b> - <a href="https://www.ryanshatch.com" target="_blank">https://www.ryanshatch.com</a></li>
-                </ul>
                 </h6>
             </div>
             <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 102, 255, 0), rgba(0, 102, 255, 0.75), rgba(0, 102, 255, 0));">
         {{% endif %}}
     </div>
+    <script>
+        function toggleMenu() {{
+            const menu = document.getElementById('navMenu');
+            menu.classList.toggle('active');
+        }}
+        document.addEventListener('click', function(event) {{
+            const menu = document.getElementById('navMenu');
+            const brand = document.querySelector('.navbar-brand');
+            if (!menu.contains(event.target) && !brand.contains(event.target)) {{
+                menu.classList.remove('active');
+            }}
+        }});
+        window.addEventListener('scroll', function() {{
+            const menu = document.getElementById('navMenu');
+            menu.classList.remove('active');
+        }});
+    </script>
 </body>
 </html>
 """
@@ -572,9 +641,9 @@ def file_page():
     
     content = """
     <div class="form-container">
-        <form method="POST" enctype="multipart/form-data"><br>
-            <input type="file" name="file" required><br>
-            <input type="password" name="password" placeholder="Password" required>
+        <form method="POST" enctype="multipart/form-data" style="text-align: center;"><br>
+            <input type="file" name="file" required style="display: inline-block;"><br>
+            <input type="password" name="password" placeholder="Enter Password:" required>
             <select name="operation" style="width: 100%; padding: 15px; margin-bottom: 20px; background-color: #2d2d2d; color: #ffffff; border: 1px solid #444; border-radius: 5px;">
                 <option value="encrypt">Encrypt</option>
                 <option value="decrypt">Decrypt</option>
@@ -679,20 +748,20 @@ def pgp_page():
     <div class="form-container">
         <form method="POST" action="/pgp/generate">
             <div class="button-wrapper">
-                <button type="submit">Generate New PGP Key Pair</button>
+                <button type="submit">Generate Keys</button>
             </div>
         </form>
         <form method="POST" action="/pgp/encrypt">
-            <textarea name="message" placeholder="Enter message to encrypt"></textarea>
-            <input type="text" name="recipient_email" placeholder="Recipient's email">
+            <textarea name="message" placeholder="Message:"></textarea>
+            <input type="text" name="recipient_email" placeholder="Email of recipient" required>
             <div class="button-wrapper">
-                <button type="submit">Encrypt Message</button>
+                <button type="submit">Encrypt</button>
             </div>
         </form>
         <form method="POST" action="/pgp/decrypt">
-            <textarea name="encrypted_message" placeholder="Enter message to decrypt"></textarea>
+            <textarea name="encrypted_message" placeholder="Message:"></textarea>
             <div class="button-wrapper">
-                <button type="submit">Decrypt Message</button>
+                <button type="submit">Decrypt</button>
             </div>
         </form>
     </div>
@@ -773,7 +842,7 @@ def pgp_decrypt():
 BOLD = '\033[1m'
 END = '\033[0m'
 
-ASCII_BANNER = f"""{BOLD}
+ASCII_BANNER = f"""
 
                            /\\
                           /__\\
@@ -781,10 +850,9 @@ ASCII_BANNER = f"""{BOLD}
                         /__\\/__\\
                        /\\      /\\
                       /__\\    /__\\
-                     /\\  /\\  /\\  /\\
-                    /__\\/__\\/__\\/__\\
+                     /\\  /\\  /\\  /\
+                    /__\\/__\\/__\\/__\
                     
-{END}
 """
 #* Function to print the Zencrypt banner in the console along with Zencrypt whitepapers and ePortfolio links to my website.
 def print_startup_banner():
@@ -800,7 +868,6 @@ if __name__ == '__main__':
     print_startup_banner()
     if os.getenv('FLASK_ENV') == 'production':
         initialize_key(1) # Initialize the encryption key for the user
-        print_startup_banner() # Displays the Triforce, ePortfolio, and Zencrypt documentation in the console when the webapp is started
         app.run(host='0.0.0.0', port=5000)  # Let Nginx handle SSL
     else:
         app.run(host='127.0.0.1', port=5000, debug=True)

@@ -24,6 +24,9 @@
 *.sqlite
 *.sqlite3
 /etc/secrets/   # If secrets are stored here
+keys/
+_pycache_/
+migrations/
 
 # Logs
 *.log
@@ -42,6 +45,8 @@ __pycache__/
 # Flask & Python virtual environments
 venv/
 instance/
+zenven/
+pyvenv.cfg
 
 # Node.js & React build files
 node_modules/
@@ -174,3 +179,17 @@ rcf/
 
 # JetBrains Rider
 *.sln.iml
+
+# dev evniroment
+dev env/checkpoints.7z.001.gpg
+dev env/checkpoints.7z.001.gpg.sig
+dev env/checkpoints.7z.002.gpg
+dev env/checkpoints.7z.002.gpg.sig
+dev env/checkpoints.7z.003.gpg
+dev env/checkpoints.7z.003.gpg.sig
+dev env/checkpoints.7z.004.gpg
+dev env/checkpoints.7z.004.gpg.sig
+dev env/sha256sum.txt
+dev env/sha256sum.txt.sig
+dev env/ssh_keys.tar.gpg
+dev env/ssh_keys.tar.gpg.sig
