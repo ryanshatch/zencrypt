@@ -341,11 +341,13 @@ APP_TEMPLATE = f"""
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zencrypt Web-App</title>
-    <link rel="icon" href="{{ url_for('favicon') }}" type="image/vnd.microsoft.icon">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600&display=swap">
     <style>
         {STYLE_TEMPLATE}
     </style>
+    <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
 </head>
 <body>
     <div class="main-content">
@@ -359,6 +361,7 @@ APP_TEMPLATE = f"""
                         <span style="font-size: 1.2rem;"></span>
                     </div>
                     <div class="navbar-menu" id="navMenu">
+                        <a href="/logout"><button>Logout</button></a>
                         <a href="/"><button>Hash</button></a>
                         <a href="/encrypt"><button>Encrypt</button></a>
                         <a href="/decrypt"><button>Decrypt</button></a>
@@ -368,7 +371,6 @@ APP_TEMPLATE = f"""
                         <div class="navbar-divider"></div>
                         <a href="/export-key"><button>Export Key</button></a>
                         <a href="/import-key"><button>Import Key</button></a>
-                        <a href="/logout"><button>Logout</button></a>
                     </div>
                 </div>
             </nav>
@@ -641,25 +643,51 @@ def file_page():
     
     content = """
     <div class="form-container">
-        <form method="POST" enctype="multipart/form-data" style="text-align: center;"><br>
-            <input type="file" name="file" required style="display: inline-block;"><br>
-            <input type="password" name="password" placeholder="Enter Password:" required>
-            <select name="operation" style="width: 100%; padding: 15px; margin-bottom: 20px; background-color: #2d2d2d; color: #ffffff; border: 1px solid #444; border-radius: 5px;">
-                <option value="encrypt">Encrypt</option>
-                <option value="decrypt">Decrypt</option>
+        <form method="POST" enctype="multipart/form-data" style="text-align: center;">
+            <div class="file-upload-wrapper" style="margin: 20px 0;">
+                <label for="file-upload" class="custom-file-upload" style="
+                    display: inline-block;
+                    padding: 10px 20px;
+                    background: #2d2d2d;
+                    color: #fff;
+                    border: 1px solid #444;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    margin-bottom: 10px;">
+                    Choose File
+                </label>
+                <input id="file-upload" type="file" name="file" required style="display: none;">
+                <div id="file-name" style="margin-top: 5px; color: #999;"></div>
+            </div>
+            <input type="password" name="password" placeholder="Enter Password" required style="width: 75%;">
+            <select name="operation" style="
+                width: 75%;
+                padding: 15px;
+                margin: 20px 0;
+                background-color: #2d2d2d;
+                color: #ffffff;
+                border: 1px solid #444;
+                border-radius: 5px;">
+                <option value="encrypt">Encrypt File</option>
+                <option value="decrypt">Decrypt File</option>
             </select>
             <div class="button-wrapper">
                 <button type="submit">Process File</button>
             </div>
         </form>
     </div>
+    <script>
+        document.getElementById('file-upload').onchange = function() {
+            document.getElementById('file-name').textContent = this.files[0] ? this.files[0].name : '';
+        };
+    </script>
     """
     
     if request.method == 'POST':
         if 'file' not in request.files:
             return render_template_string(APP_TEMPLATE,
                 content=content,
-                output="No file uploaded")
+                output="Please select a file to process")
             
         file = request.files['file']
         if file.filename == '':
@@ -669,21 +697,31 @@ def file_page():
             
         try:
             file_content = file.read()
-            salt = os.urandom(16)
             password = request.form.get('password', '').encode()
             operation = request.form.get('operation')
+            
+            if not password:
+                return render_template_string(APP_TEMPLATE,
+                    content=content,
+                    output="Password is required")
             
             cipher_suite = get_cipher_suite(session['user_id'])
             if operation == 'encrypt':
                 encrypted = cipher_suite.encrypt(file_content)
-                output = f"File encrypted successfully:\n{base64.b64encode(encrypted).decode()}"
+                return render_template_string(APP_TEMPLATE,
+                    content=content,
+                    output=f"File encrypted successfully!\nEncrypted content:\n{base64.b64encode(encrypted).decode()}")
             else:
-                decrypted = cipher_suite.decrypt(base64.b64decode(file_content))
-                output = f"File decrypted successfully:\n{decrypted.decode()}"
+                try:
+                    decrypted = cipher_suite.decrypt(base64.b64decode(file_content))
+                    return render_template_string(APP_TEMPLATE,
+                        content=content,
+                        output=f"File decrypted successfully!\nDecrypted content:\n{decrypted.decode()}")
+                except Exception:
+                    return render_template_string(APP_TEMPLATE,
+                        content=content,
+                        output="Invalid encrypted file or wrong password")
                 
-            return render_template_string(APP_TEMPLATE,
-                content=content,
-                output=output)
         except Exception as e:
             return render_template_string(APP_TEMPLATE,
                 content=content,
@@ -699,21 +737,35 @@ def export_key():
     try:
         key = Key.query.filter_by(user_id=session['user_id'], active=True).first()
         if key:
+            key_name = request.args.get('key_name', 'zen_key')  # Default to 'zen_key' if no name provided
             response = app.response_class(
                 key.key_value,
                 mimetype='application/octet-stream',
-                headers={'Content-Disposition': 'attachment;filename=zen_key.key'}
+                headers={'Content-Disposition': f'attachment;filename={key_name}.key'}
             )
             return response
         return "No active key found", 404
     except Exception as e:
         return f"Error exporting key: {str(e)}", 500
 
-@app.route('/import-key', methods=['POST'])
+@app.route('/import-key', methods=['GET', 'POST'])
 def import_key():
     if not session.get('user_id'):
         return redirect(url_for('login'))
     
+    if request.method == 'GET':
+        # Show the file upload form 
+        content = """
+        <div class="form-container">
+            <form method="POST" action="/import-key" enctype="multipart/form-data">
+                <input type="file" name="key_file" style="display: none;" id="key_file" onchange="this.form.submit()">
+                <button type="button" onclick="document.getElementById('key_file').click()">Import Key</button>
+            </form>
+        </div>
+        """
+        return render_template_string(APP_TEMPLATE, content=content)
+    
+    # Handle POST request (file upload)
     if 'key_file' not in request.files:
         return redirect(url_for('hash_page'))
         
