@@ -1,2 +1,0 @@
-# Zencrypt Web App
-
