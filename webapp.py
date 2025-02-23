@@ -56,9 +56,6 @@ load_dotenv()
 # Flask Configuration and JWT Manager
 app = Flask(__name__)
 
-app.config["SECRET_KEY"] = "some-random-secret"
-app.config["WTF_CSRF_ENABLED"] = True
-
 # SQLite Configuration
 basedir = os.path.abspath(os.path.dirname(__file__)) # Get the base directory of the current file
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI', f'sqlite:///{basedir}/zencrypt.db') 
@@ -71,6 +68,9 @@ db.init_app(app)
 migrate = Migrate(app, db)  # Track and manage database migrations
 
 # Initialize CSRF Protection
+app.config["SECRET_KEY"] = os.getenv('SECRET_KEY', os.urandom(24)) 
+app.config["WTF_CSRF_ENABLED"] = False
+
 csrf = CSRFProtect(app)
 
 # #* ---------------------- | Database Initialization | ---------------------- #
