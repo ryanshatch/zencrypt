@@ -56,6 +56,9 @@ load_dotenv()
 # Flask Configuration and JWT Manager
 app = Flask(__name__)
 
+app.config["SECRET_KEY"] = "some-random-secret"
+app.config["WTF_CSRF_ENABLED"] = True
+
 # SQLite Configuration
 basedir = os.path.abspath(os.path.dirname(__file__)) # Get the base directory of the current file
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI', f'sqlite:///{basedir}/zencrypt.db') 
@@ -94,7 +97,7 @@ def init_db():
 # Initialize the database
 init_db()
 
-app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24))
+#* app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24))
 
 # #* ---------------------- | JWT Configuration | ---------------------- #
 # Set secret key and token expiration time to 30 minutes
