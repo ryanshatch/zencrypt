@@ -490,7 +490,7 @@ redis_connection = Redis(host='localhost', port=6379)
 limiter = Limiter(
     app=app,
     key_func=get_remote_address,
-    default_limits=["100 per day", "30 per hour"]
+    default_limits=["100 per day", "30 per hour"],
     storage_uri="redis://localhost:6379"
 )
     
