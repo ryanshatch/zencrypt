@@ -488,7 +488,7 @@ limiter = Limiter(
     default_limits=["100 per day", "30 per hour"]
 )
 @app.route('/login', methods=['GET', 'POST'])      # Route to the login page of the web-app with the login function
-@limiter.limit("3 per minute")                     # Limit the number of login attempts to 3 per minute
+@limiter.limit("10 per minute")                     # Limit the number of login attempts to 3 per minute
 def login():
     if request.method == 'POST':                # Check if the request method is POST
         email = request.form.get('email')       # Get the email from the form input for the user
