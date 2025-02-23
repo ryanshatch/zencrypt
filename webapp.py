@@ -28,6 +28,7 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_wtf.csrf import CSRFProtect
+from redis import Redis
 
 # Cryptographic imports for encryption and hashing
 from cryptography.fernet import Fernet
@@ -484,12 +485,15 @@ def favicon():
 
 #* ---------------------- | Authentication Routes | ---------------------- #
 #* Route to the login page of the web-app with the login function for user authentication
+redis_connection = Redis(host='localhost', port=6379)
 
 limiter = Limiter(
     app=app,
     key_func=get_remote_address,
     default_limits=["100 per day", "30 per hour"]
+    storage_uri="redis://localhost:6379"
 )
+    
 @app.route('/login', methods=['GET', 'POST'])      # Route to the login page of the web-app with the login function
 @limiter.limit("10 per minute")                     # Limit the number of login attempts to 10 per minute
 def login():
