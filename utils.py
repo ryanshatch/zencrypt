@@ -1,16 +1,26 @@
 """
 ********************************************************************************************
-* Utils.py                         |********************************************************
+* utils.py                         |********************************************************
 * Developed by: Ryan Hatch         |********************************************************
 * Date: August 10th 2022           |********************************************************
 * Last Updated: Febuary 13th 2025  |********************************************************
-* Version: v6.2-A                  |********************************************************
+* Version: 6.2.2-A                 |********************************************************
 ********************************************************************************************
 ********************************#* Description: |*******************************************
 <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-*              Zencrypt Web-App is a Flask application that can be used to:                *
-*       - Generate hashes: using SHA256 hashing algorithm, with an optional salt value.    *
-*       - Encrypt text and files: using Fernet symmetric encryption algorithm.             *
+|  utils.py is a module that contains the utility functions for the web-app.               *
+*    The utility functions include:                                                        *
+*       - initialize_key: initializes the key for encryption.                              *
+*       - generate_hash: generates a hash of the text using SHA256.                        *
+*       - encrypt_text: encrypts the text using the key.                                   *
+*       - decrypt_text: decrypts the text using the key.                                   *
+*       - generate_pgp_keys: generates a pair of PGP keys using RSA encryption.            *
+*       - encrypt_file: encrypts the file using AES encryption with a password.            *
+*       - decrypt_file: decrypts the file using AES encryption with a password.            *
+*       - generate_key: generates a key from the password and the salt using PBKDF2HMAC.   *
+*       - generate_pgp_keypair: generates a pair of PGP keys using RSA encryption.         *
+*       - pgp_encrypt_message: encrypts the message using the public key.                  *
+*       - pgp_decrypt_message: decrypts the message using the private key.                 *
 <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 ********************************************************************************************
 """
@@ -101,61 +111,65 @@ def generate_key(password: bytes, salt: bytes) -> bytes: #* generates a key from
 
     return kdf.derive(password)     # derives the key from the password and the salt using the KDF - Key Derivation Function
 
-#* PGP Encryption Functions
-def generate_pgp_keypair():
-    private_key = rsa.generate_private_key(
-        public_exponent=65537,
-        key_size=2048,
-        backend=default_backend()
+#* Generate PGP Key Pair
+def generate_pgp_keypair(): #* generates a pair of PGP keys using RSA encryption
+    private_key = rsa.generate_private_key( #* generates a private key
+        public_exponent=65537,              # The public exponent is set to 65537 for compatibility and security
+        key_size=2048,                     # The key size is set to 2048 bits for security and compatibility
+        backend=default_backend()         # uses the default backend for the cryptography library
     )
     
     # Serialize private key
-    private_pem = private_key.private_bytes(
-        encoding=crypto_serialization.Encoding.PEM,
-        format=crypto_serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=crypto_serialization.NoEncryption()
+    private_pem = private_key.private_bytes( #* serializes the private key
+        encoding=crypto_serialization.Encoding.PEM, #* uses PEM encoding for the serialization
+        format=crypto_serialization.PrivateFormat.PKCS8, #* uses PKCS8 format for the serialization
+        encryption_algorithm=crypto_serialization.NoEncryption() #* uses no encryption for the serialization
     )
     
     # Serialize public key
-    public_pem = private_key.public_key().public_bytes(
-        encoding=crypto_serialization.Encoding.PEM,
-        format=crypto_serialization.PublicFormat.SubjectPublicKeyInfo
+    public_pem = private_key.public_key().public_bytes( #* serializes the public key
+        encoding=crypto_serialization.Encoding.PEM, #* uses PEM encoding for the serialization
+        format=crypto_serialization.PublicFormat.SubjectPublicKeyInfo #* uses SubjectPublicKeyInfo format for the serialization
     )
     
-    return private_pem.decode(), public_pem.decode()
+    # Return private and public keys
+    return private_pem.decode(), public_pem.decode() #* returns the private and public keys as strings
 
-def pgp_encrypt_message(message: str, public_key_pem: str) -> str:
-    public_key = crypto_serialization.load_pem_public_key(
-        public_key_pem.encode(),
-        backend=default_backend()
+#* PGP Encryption Functions
+def pgp_encrypt_message(message: str, public_key_pem: str) -> str: #* encrypts the message using the public key
+    public_key = crypto_serialization.load_pem_public_key( #* loads the public key from the PEM encoded string
+        public_key_pem.encode(), #* loads the public key from the PEM encoded string
+        backend=default_backend() #* uses the default backend for the cryptography library
     )
     
-    encrypted = public_key.encrypt(
-        message.encode(),
-        padding.OAEP(
-            mgf=padding.MGF1(algorithm=hashes.SHA256()),
-            algorithm=hashes.SHA256(),
-            label=None
+    encrypted = public_key.encrypt( #* encrypts the message using the public key
+        message.encode(), #* encodes the message as bytes
+        padding.OAEP( #* uses OAEP padding for the encryption
+            mgf=padding.MGF1(algorithm=hashes.SHA256()), #* uses MGF1 padding with SHA256 as the hashing algorithm
+            algorithm=hashes.SHA256(), #* uses SHA256 as the hashing algorithm
+            label=None #* no label is used for the padding
         )
     )
     
-    return base64.b64encode(encrypted).decode()
+    return base64.b64encode(encrypted).decode() #* returns the encrypted message as a base64 encoded strings
 
-def pgp_decrypt_message(encrypted_message: str, private_key_pem: str) -> str:
-    private_key = crypto_serialization.load_pem_private_key(
-        private_key_pem.encode(),
-        password=None,
-        backend=default_backend()
+#* PGP Decryption Functions
+def pgp_decrypt_message(encrypted_message: str, private_key_pem: str) -> str:   #* decrypts the message using the private key
+    private_key = crypto_serialization.load_pem_private_key(                    #* loads the private key from the PEM encoded string
+        private_key_pem.encode(),                                               #* loads the private key from the PEM encoded string
+        password=None,                                                          #* no password is used for the private key
+        backend=default_backend()                                               #* uses the default backend for the cryptography library
     )
     
-    encrypted_bytes = base64.b64decode(encrypted_message)
+    # Decode the base64 encoded message
+    encrypted_bytes = base64.b64decode(encrypted_message)   #* decodes the base64 encoded message
     decrypted = private_key.decrypt(
-        encrypted_bytes,
-        padding.OAEP(
-            mgf=padding.MGF1(algorithm=hashes.SHA256()),
-            algorithm=hashes.SHA256(),
-            label=None
+        encrypted_bytes,                                    #* decrypts the message using the private key
+        padding.OAEP(                                       #* uses OAEP padding for the decryption
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),    #* uses MGF1 padding with SHA256 as the hashing algorithm
+            algorithm=hashes.SHA256(),                      #* uses SHA256 as the hashing algorithm
+            label=None                                      #* no label is used for the padding
         )
     )
     
-    return decrypted.decode()
+    return decrypted.decode()                               #* returns the decrypted message as a string

@@ -58,10 +58,10 @@ Version: 5.0                     ***********************************************
       <li>Install the required dependencies with the command: <code>pip install -r requirements.txt</code>. </li>
     </ol>
     <h2 id="usage">Usage</h2>
-    <h3>Pre-Release/ Beta Version 4.0.1-beta</h3>
-    <p> 1. After installing the required dependencies, you can run the script using the Python interpreter and running the command: <code>python zencrypt_cli.py</code>, or you can run the service local via localhost using <code>python webapp.py</code>
-      <br>From there you will either continue to the next step or you will visit http:localhost/5000 <br>If you see a Triforce on your console, you did everything right and proceed to the next step.<br>2. Select whether you want to <code>hash, encrypt text, or parse files</code> and then follow the on screen instructions. <br>
-      <br>To exit the program, simply enter <code>exit</code>.
+    <h3>Command Line Interface: v4.2-CLI</h3>
+    <p> 1. After installing the required dependencies, you can run the script using the Python interpreter and running the command: <code>python zencrypt.py</code>..
+    <br>2. Select whether you want to <code>hash, encrypt text, or parse files</code> and then follow the on screen instructions. <br>
+    <br>To exit the program, simply enter <code>exit</code>.
     </p>
     <h2></h2>
     <p align="center">
@@ -92,20 +92,6 @@ Version: 5.0                     ***********************************************
     </center>
     </p>
     <hr><br>
-    <hr><br>
-    <h2 align="center" id="contributing">Contributing</h2>
-    <ol>
-      <p align="center">
-        <strong>Please reach out to me to verify and validate your ideas and contributions before continuing any further. Although contributions may be welcome, it will be discussed first. <br>
-          <br> After reaching out to me, please follow these steps: </strong>
-        <br>
-        <li>Fork the repository.</li>
-        <li>Create a new branch with the command: <code>git checkout -b feature-branch</code>.
-        <li>Make your changes.</li>
-        <li>Commit your changes with the command: <code>git commit -am 'Add new feature'</code>.
-        <li>Push to the branch with the command: <code>git push origin feature-branch</code>.
-        <li>Create a new Pull Request.</li>
-    </ol>
 <!--     <h1></h1> -->
     <h1 align="center" id="disclaimer">DISCLAIMER!</h1>
     <p align="center">

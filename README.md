@@ -13,10 +13,34 @@
 |       - Encrypt text and files: using Fernet symmetric encryption algorithm.             |
 <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 -->
-
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html>
+  <body>
+    <hr>
+    <h1 align="center">Zencrypt</h1>
+    <hr>
+    <br>
+    <p align="center">
+      <strong>Webapp Release - v6.2-alpha</strong>
+<!--       <br>
+      <strong>By: Ryan Hatch</strong> -->
+      <br>
+    </p>
+    <p align="center">
+      <a href="#introduction">Introduction</a> • <a href="#features">Features</a> • <a href="#installation">Installation</a> • <a href="#usage">Usage</a> • <a href="#examples">Examples</a> • <a href="#contributing">Contributing</a> • <a href="#disclaimer">Disclaimer</a> • <a href="#license">License</a> • <a href="#contact">Contact</a>
+    </p>
+    <hr>
+    <p align="center">
+<!--       <br> -->
+      <strong>Developed By: Ryan Hatch</strong>
+    <p align="center"> &copy; 2025 Ryan Hatch <br> All Rights Reserved.<br><i><br>This software is proprietary and owned by Ryan Hatch. Unauthorized use, modification, or distribution is prohibited.</i> </p>
+<p align="center"><img src="https://img.shields.io/badge/Name:-Zencrypt-0A2647?style=for-the-badge" alt="Project Name"><img src="https://img.shields.io/badge/Author-Ryan%20S%20Hatch-0A2647?style=for-the-badge" alt="Project Author"> <img src="https://img.shields.io/badge/Started-January%202021-144272?style=for-the-badge" alt="Project Start Date"> <img src="https://img.shields.io/badge/Updated-Feb%2019%2C%202025-205295?style=for-the-badge" alt="Project Last Updated On"></p>
+<p align="center"><img src="https://img.shields.io/badge/Type:-Software%20Development-144272?style=for-the-badge" alt="Project Type"> <img src="https://img.shields.io/badge/Stage:-Production%20Ready-205295?style=for-the-badge" alt="Project Stage"> <img src="https://img.shields.io/badge/Version-v6.2.2--alpha-2C74B3?style=for-the-badge" alt="Project Version"></p>
+<hr>
 <div class="table-of-contents">
   <h1>Table of contents</h1>
-  <h2>Webapp v5.3-A3</h2>
+  <h2>Webapp v6</h2>
   <ul>
     <li><a href="README.md">What is Zencrypt</a></li>
     <li><a href="cipher/zencrypt-cli.md">Getting To Know About The Zencrypt CLI</a></li>
@@ -70,27 +94,6 @@
 |       - Encrypt text and files: using Fernet symmetric encryption algorithm.             |
 <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 -->
-<!DOCTYPE html>
-<html>
-  <body>
-    <hr>
-    <h1 align="center">Zencrypt</h1>
-    <hr>
-    <br>
-    <p align="center">
-      <strong>Webapp Release - v5.3-A3</strong>
-<!--       <br>
-      <strong>By: Ryan Hatch</strong> -->
-      <br>
-    </p>
-    <p align="center">
-      <a href="#introduction">Introduction</a> • <a href="#features">Features</a> • <a href="#installation">Installation</a> • <a href="#usage">Usage</a> • <a href="#examples">Examples</a> • <a href="#contributing">Contributing</a> • <a href="#disclaimer">Disclaimer</a> • <a href="#license">License</a> • <a href="#contact">Contact</a>
-    </p>
-    <hr>
-    <p align="center">
-<!--       <br> -->
-      <strong>Developed By: Ryan Hatch</strong>
-    <p align="center"> &copy; 2025 Ryan Hatch <br> All Rights Reserved.<br><i><br>This software is proprietary and owned by Ryan Hatch. Unauthorized use, modification, or distribution is prohibited.</i> </p>
     <h3>Logs of Recent Updates:</h3>
     <li>Jan 20 2025 - Updated comments and added a more simple structure for the changes to be made.</li>
     <li>Jan 21st 2025 - Merged the CLI into a webapp using the Flask framework. The current version is being hosted at <a href="https://zencrypt.app">Zencrypt.app</a></li>

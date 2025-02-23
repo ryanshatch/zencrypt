@@ -193,3 +193,8 @@ dev env/sha256sum.txt
 dev env/sha256sum.txt.sig
 dev env/ssh_keys.tar.gpg
 dev env/ssh_keys.tar.gpg.sig
+
+gen-secrets.py
+migrations/
+zenven/
+pyvenv.cfg

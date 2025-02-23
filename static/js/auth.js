@@ -1,18 +1,26 @@
-// ********************************************************************************************
-// * Title: Zencrypt WebApp           |********************************************************
-// * Developed by: Ryan Hatch         |********************************************************
-//   Date: August 10th 2022           |********************************************************
-//   Last Updated: February 13th 2025 |********************************************************
-//   Version: 6.2-A                   |********************************************************
-// -  *****************************************************************************************
-// *  ***************************#*| Zencrypt v6.2-A |*****************************************
-// <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-// *******************************#* Description: |********************************************
-// <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-// |              Zencrypt Web-App is a Flask application that can be used to:                |
-// |       - Generate hashes: using SHA256 hashing algorithm, with an optional salt value.    |
-// |       - Encrypt text and files: using Fernet symmetric encryption algorithm.             |
-// <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+//* *********************************************************************************************
+// * Date: August 10th 2022           |**********************************************************
+// * Last Updated: Febuary 13th 2025  |**********************************************************
+// * Version: 6.2.2-A                 |**********************************************************
+// **********************************************************************************************
+// ********************************#* Description: |*********************************************
+// <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+// | This file contains the logic for user authentication and PGP key generation. The user can  |
+// | login using their email and password. If the user is successfully authenticated, they can  |
+// | generate PGP keys. The PGP keys are generated using the OpenPGP.js library. The public key |
+// | is stored in the SQLite database and the private key is stored in the browser's local      |
+// | storage. The user can use the public key to encrypt messages and the private key to decrypt|
+// | messages. The user can also log out by removing the JWT token from the local storage.      |
+// |********************************************************************************************|
+// | The user authentication process is handled by sending a request to the server with the     |
+// | user's email and password. If the user is successfully authenticated, a JWT token is       |
+// | generated and stored in the local storage. The user data is also stored in the state       |
+// | variable. The PGP key generation process is handled by sending a request to the server to  |
+// | generate the PGP keys. If the PGP keys are successfully generated, the public key is stored|
+// | in the SQLite database and the private key is stored in the browser's local storage.       |
+// |********************************************************************************************|
+// <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+// **********************************************************************************************
 
 import React, { useState, useEffect } from 'react';
 import { Alert, AlertTitle } from '@/components/ui/alert';

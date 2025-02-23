@@ -1,3 +1,21 @@
+//* ************************************************************************************************
+// * Date: August 10th 2022           |*************************************************************
+// * Last Updated: Febuary 13th 2025  |*************************************************************
+// *************************************************************************************************
+// ********************************#* Description: |************************************************
+// <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>|
+// | This is the Navbar component for the Zencrypt application. This component is responsible for  |
+// | rendering the navigation bar at the top of the application. The navigation bar contains links |
+// | to the different pages of the application. The Navbar component is a functional component that|
+// | returns the JSX for the navigation bar.                                                       |
+// |********************************************************************************************** |
+// | The Navbar component is imported into the App component and rendered at the top of the        |
+// | application. The navigation bar contains links to the different pages of the application.     |
+// | The navigation bar is styled using Tailwind CSS classes.                                      |
+// |***********************************************************************************************|
+// <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>|
+// *************************************************************************************************
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 
