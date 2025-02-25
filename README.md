@@ -22,7 +22,7 @@
     <hr>
       <p align="center">
       <a href="https://www.dial.to/?action=solana-action:https://action.solscan.io/api/donate?receiver=777ePKXhcxMdJPMA22YeiR6pdMUTadnpT7AUyto2Y24N">
-      <img src="https://img.shields.io/badge/tip me in $solana-black?style=for-the-badge&logo=solana&logoColor=blue" alt="solana" />
+      <img src="https://img.shields.io/badge/tip me ◎-black?style=for-the-badge&logo=solana&logoColor=blue" alt="solana" />
     </a>
     <br>
     <p align="center">
