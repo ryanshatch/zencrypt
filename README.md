@@ -316,6 +316,7 @@ def pgp_encrypt():
 ```
 
 The process I am using is:
+
 1. The user will enter the recipients email enters recipient's email
 2. The System looks for that user in the database using the email as the unique identifier
 3. Gets that user's public PGP key from the database
@@ -326,6 +327,43 @@ This follows the standard PGP encryption workflow where:
 - Only the recipient can decrypt things using their private key
 - No actual emails are sent, so the email is just used as an identifier to find the right public key
 <br>
+
+---
+
+# **Generating Encryption Keys**
+To generate your own secure encryption keys, you can use the following methods: 
+
+## **Using OpenSSL with the Command Line:**
+For a Unix-based terminal you can run this command: 
+
+```sh
+openssl rand -base64 32
+```
+
+## **Using Python**
+Using python to generate a new key: 
+
+```python
+import os, base64
+key = base64.b64encode(os.urandom(32)).decode('utf-8')
+print(key)
+```
+
+## **Using Node.js**
+For JavaScript environments, you can generate a new key by running:
+ 
+```javascript
+const crypto = require('crypto');
+const key = crypto.randomBytes(32).toString('base64');
+console.log(key);
+```
+<hr>
+
+>
+> ```python
+> These methods will randomly generate a 256-bit key and format it as a Base64 string.
+> ```
+> 
 <hr>
     <h2 id="examples">Examples of CLI (v4.2-alpha) Functionality:</h2>
     <h3 align="center">Hashing:</h3>
