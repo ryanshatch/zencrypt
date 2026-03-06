@@ -51,21 +51,21 @@ The following versions of Zencrypt are currently supported with security updates
 4. Resolution and patch release
 5. Public disclosure (if applicable)
 
-## Security Hardening Baseline (Flask + SQLite)
+## Security Hardening Baseline
 
-For production deployments (including Render), verify all items below:
+For production deployments, we apply defense-in-depth controls across secrets management, authentication, transport, input validation, dependency hygiene, and operational monitoring.
 
-- Keep all secrets in environment variables only (`SECRET_KEY`, JWT secret, encryption passphrases).
-- Use randomly generated values for all secrets (minimum 32 bytes entropy).
-- Enable secure cookie flags (`SESSION_COOKIE_SECURE`, `SESSION_COOKIE_HTTPONLY`, `SESSION_COOKIE_SAMESITE='Lax'` or `'Strict'`).
-- Enable CSRF protection on all state-changing form endpoints.
-- Add request rate limiting for login, registration, and encryption endpoints.
-- Validate and sanitize all user-provided filenames and upload MIME types.
-- Limit upload size via `MAX_CONTENT_LENGTH` to prevent denial-of-service.
-- Set strict response headers (CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy).
-- Run dependency and secret scanning in CI/CD before deploy.
-- Keep SQLite file outside of publicly served directories and enforce file permissions (`0600` where possible).
-- Turn off Flask debug mode in production and never expose Werkzeug debugger publicly.
+At a high level, our baseline includes:
+
+- Secrets are stored outside source control and rotated when needed.
+- Authentication and session controls are configured for secure defaults.
+- State-changing requests are protected against forgery and abuse.
+- Upload and input surfaces are constrained and validated.
+- Security headers and TLS are enforced in production.
+- Dependency and repository scanning are part of release checks.
+- Production debug and developer tooling are disabled.
+
+To avoid oversharing implementation details in public documentation, exact production settings are maintained in internal operations runbooks and deployment configuration.
 
 ## Security Updates
 
