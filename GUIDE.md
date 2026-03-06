@@ -66,9 +66,9 @@ Zencrypt is a Flask-based web application focused on encryption, hashing, and se
      ```env
      FLASK_ENV=development
      FLASK_APP=app.py
-     SECRET_KEY=secret_key
-     JWT_SECRET_KEY=some_secret_key
-     SQLALCHEMY_DATABASE_URI=supported_database_uri
+     SECRET_KEY=<generate_32_plus_byte_random_secret>
+     JWT_SECRET_KEY=<generate_32_plus_byte_random_secret>
+     SQLALCHEMY_DATABASE_URI=sqlite:////absolute/path/to/zencrypt.db
      ```
 
 ### Starting the Application
