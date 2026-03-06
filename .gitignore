@@ -38,6 +38,7 @@ zencrypt/gitbook/SUMMARY.md
 *.sqlite
 *.sqlite3
 /etc/secrets/   # If secrets are stored here
+etc/secrets/    # Relative path in this repository
 keys/
 _pycache_/
 migrations/
@@ -212,3 +213,23 @@ gen-secrets.py
 migrations/
 zenven/
 pyvenv.cfg
+
+
+# Additional hardening rules
+.env.*
+!.env.example
+*.sqlite-journal
+*.db-journal
+*.dump
+*.bak
+*.old
+*.orig
+*.swp
+*.swo
+
+# Security scan outputs that may expose endpoints/session data
+zap-report*.html
+*owasp*zap*.html
+
+# Local/editor/system artifacts
+*.tmp
