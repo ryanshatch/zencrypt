@@ -43,6 +43,18 @@
 <p align="center"><img src="https://img.shields.io/badge/Name:-Zencrypt-0A2647?style=for-the-badge" alt="Project Name"><img src="https://img.shields.io/badge/Author-Ryan%20S%20Hatch-0A2647?style=for-the-badge" alt="Project Author"> <img src="https://img.shields.io/badge/Started-January%202021-144272?style=for-the-badge" alt="Project Start Date"> <img src="https://img.shields.io/badge/Updated-Feb%2019%2C%202025-205295?style=for-the-badge" alt="Project Last Updated On"></p>
 <p align="center"><img src="https://img.shields.io/badge/Type:-Software%20Development-144272?style=for-the-badge" alt="Project Type"> <img src="https://img.shields.io/badge/Stage:-Production%20Ready-205295?style=for-the-badge" alt="Project Stage"> <img src="https://img.shields.io/badge/Version-v6.2.2--alpha-2C74B3?style=for-the-badge" alt="Project Version"></p>
 <hr>
+    <h2>Project status (March 31, 2026)</h2>
+
+<p><strong>Zencrypt</strong> is currently undergoing a repo and branch organization pass, including documentation cleanup, branch pruning, and version tag/release standardization.</p>
+
+<p>Expect some temporary inconsistencies in branch names, folder layout, and docs while this work is in progress.</p>
+
+<p><strong>Stable entry points</strong></p>
+<ul>
+  <li>Code: <code>main</code></li>
+  <li>Versions: <code>Releases / Tags</code></li>
+</ul>
+<hr>
 <div class="webapp">
   <h1>Webapp v6 and CLI v4.2</h1>
   <!-- <h2>Webapp v6</h2> -->
